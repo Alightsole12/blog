@@ -17,10 +17,10 @@ gulp.task('css',()=>{
 
 // JS
 gulp.task('js',()=>{
-	return gulp.src('public/js/**/*.js')
+	return gulp.src('public/js/angular/**/*.js')
 		.pipe(concat('scripts.js'))
 		.pipe(babel({presets:['es2015']}))
-		.pipe(uglify())
+		.pipe(uglify({mangle:false}))
 		.pipe(gulp.dest('public/js'));
 });
 

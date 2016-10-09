@@ -1,1 +1,1 @@
-"use strict";var seven=8;
+"use strict";var BlogApp=angular.module("BlogApp",[]);BlogApp.controller("PreviewController",function($scope){$scope.test="Hello World"});
