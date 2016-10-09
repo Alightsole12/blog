@@ -1,12 +1,12 @@
 {
-  "name": "taiznet",
-  "version": "1.0.0",
-  "description": "",
+  "name": "blog",
+  "version": "0.7.1",
+  "description": "A blog about my various programming misadventures.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Tyler Walker",
   "license": "ISC",
   "dependencies": {
     "babel-preset-es2015": "^6.16.0",
