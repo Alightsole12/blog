@@ -50,7 +50,7 @@ App.get('/404',(req,res)=>{
 	res.render("404",{"pun":punArray[Math.floor(Math.random()*punArray.length)]});
 });
 
-// If the client's GET request matches none of the availible ones, it'll reach here
+// If the client's GET request matches none of the availible ones, it'll end up here
 App.get('/*',(req,res)=>{
 	res.redirect("/404");
 });
