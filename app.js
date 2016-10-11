@@ -23,8 +23,8 @@ App.get('/',(req,res)=>{
 });
 
 // The main blog page
-App.get('/blog',(req,res)=>{
-	res.render("blog",{});
+App.get('/blog',(req,res)=>{ // This is a good idea: http://www.nodejsconnect.com/blog/archive/201608
+	res.render("blog",{}); // Say we used a recents.json?
 });
 
 // A specific blog post
