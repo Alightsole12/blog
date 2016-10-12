@@ -5,7 +5,7 @@ const http = require('http'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs');
 
-const ip = '192.168.2.12',
+const ip = '192.168.2.9',
 	port = 8000; // Be sure to remove ip before deploying, and to update port to env values
 
 // App Setup
@@ -24,11 +24,23 @@ App.get('/',(req,res)=>{
 
 // The main blog page
 App.get('/blog',(req,res)=>{ // This is a good idea: http://www.nodejsconnect.com/blog/archive/201608
-	res.render("blog",{}); // Say we used a recents.json?
+	fs.readFile("data/recent.json","utf-8",(err,data)=>{
+		// Get query string, if 2 grab next 5 from index etc
+		const recent = JSON.parse(data).recent;
+		console.log(`URL Query: ${req.query.page}`);
+		console.log(recent[0]);
+		let recentPosts = [];
+		for(let i = 0; i<= 4; i++){
+			recentPosts.push(recent[i*req.query.page]);
+		}
+		console.log(recentPosts);
+		res.render("blog",{"recents":recentPosts});
+	});
 });
 
 // A specific blog post
 App.get('/blog/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
+	// BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 	const urlData = req.url.split("/");
 	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
 	const renderPost = ()=>{
