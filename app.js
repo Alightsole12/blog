@@ -6,7 +6,7 @@ const http = require('http'),
 	ejs = require('ejs');
 
 const ip = '192.168.2.9';
-const port = process.env.PORT || 8000;
+var port = process.env.PORT || 8000;
 
 // App Setup
 const App = express();
