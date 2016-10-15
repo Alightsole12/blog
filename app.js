@@ -5,8 +5,8 @@ const http = require('http'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs');
 
-const ip = '192.168.2.9',
-	port = 8000; // Be sure to remove ip before deploying, and to update port to env values
+//const ip = '192.168.2.9';
+const port = process.env.PORT || 8000;
 
 // App Setup
 const App = express();
@@ -29,8 +29,8 @@ App.get('/blog',(req,res)=>{ // This is a good idea: http://www.nodejsconnect.co
 		const recent = JSON.parse(data).recent;
 		console.log(`URL Query: ${req.query.page}`);
 		console.log(recent[0]);
-		let recentPosts = [];
-		for(let i = 0; i<= 4; i++){
+		var recentPosts = [];
+		for(var i = 0; i<= 4; i++){
 			recentPosts.push(recent[i*req.query.page]);
 		}
 		console.log(recentPosts);
@@ -68,6 +68,6 @@ App.get('/*',(req,res)=>{
 });
 
 // Server Launch
-App.listen(port,ip,()=>{
+App.listen(port,()=>{
 	console.log(`App running on ${ip}:${port}`);
 });
