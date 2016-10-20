@@ -8,7 +8,6 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
-// Maybe set the entire string to a single environment variable to save serverside computations and achieve a faster response?
 const client = new pg.Client(process.env.databaseLink); // Making a new client
 client.connect(); // Connecting to the database
 const query = client.query( // Making the query
