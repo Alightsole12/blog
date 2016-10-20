@@ -67,6 +67,10 @@ App.get('/*',(req,res)=>{
 	res.redirect("/404");
 });
 
+App.get('/dev',(req,res)=>{
+	res.send("TEST PAGE: "+process.env.carrots);
+});
+
 // Server Launch
 App.listen(port,()=>{
 	console.log(`App running on ${ip}:${port}`);
