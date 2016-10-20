@@ -8,8 +8,7 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
-const connection = `postgres://${process.env.databaseUser}:${process.env.databasePassword}@${process.env.databaseHost}:${process.env.databasePort}/${process.env.databaseName}`; // Making the connection link
-const client = new pg.Client(connection); // Making a new client
+const client = new pg.Client(process.env.databaseLink); // Making a new client
 client.connect(); // Connecting to the database
 const query = client.query( // Making the query
 	'CREATE TABLE test()'
