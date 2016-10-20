@@ -14,7 +14,7 @@ client.connect(); // Connecting to the database
 const query = client.query( // Making the query
 	'CREATE TABLE test()'
 );
-query.on('end'.()=>{client.end();}); // Once the query is complete, the client will close
+query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 // App Setup
 const App = express();
 App.set('views','./views');
