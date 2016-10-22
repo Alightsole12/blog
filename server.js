@@ -47,7 +47,7 @@ App.get('/blog',(req,res)=>{ // This is a good idea: http://www.nodejsconnect.co
 });
 
 // A specific blog post
-App.get('/blog/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
+App.get('/blog/post/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
 	// BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 	const urlData = req.url.split("/");
 	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
@@ -70,18 +70,25 @@ App.get('/404',(req,res)=>{
 	res.render("404",{"pun":punArray[Math.floor(Math.random()*punArray.length)]});
 });
 
-App.get('/dev',(req,res)=>{
-	res.render("dev",{});
+//App.get('/blog/dev',(req,res)=>{
+	//res.render("dev",{});
+//});
+App.get('/signin',(req,res)=>{
+	res.send("Signin");
 });
 
-App.get('/new',(req,res)=>{
-	res.redirect('/dev');
+App.get('/blog/new',(req,res)=>{
+	res.render('/signin?target=blog_new',{}); // ISSUE: express seems to think this is a seperate file rather than one with query data
 });
-App.post('/new',(req,res)=>{
+App.post('/blog/new',(req,res)=>{
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the master ones
-		res.render("new",{});
+		res.render("blog_new",{});
 	else
-		res.redirect('/dev');
+		res.redirect('/blog/dev');
+});
+
+App.get('/blog/edit',(req,res)=>{
+	res.redirect('/blog/dev');
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
