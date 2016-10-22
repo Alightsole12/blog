@@ -8,12 +8,14 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
+/* // Comment out for dev
 const client = new pg.Client(process.env.databaseLink); // Making a new client
 client.connect(); // Connecting to the database
 const query = client.query( // Making the query
 	'CREATE TABLE test()'
 );
 query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
+*/
 // App Setup
 const App = express();
 App.set('views','./views');
@@ -69,7 +71,17 @@ App.get('/404',(req,res)=>{
 });
 
 App.get('/dev',(req,res)=>{
-	res.send("TEST PAGE: "+process.env.carrots);
+	res.render("dev",{});
+});
+
+App.get('/new',(req,res)=>{
+	res.redirect('/dev');
+});
+App.post('/new',(req,res)=>{
+	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the master ones
+		res.render("new",{});
+	else
+		res.redirect('/dev');
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
