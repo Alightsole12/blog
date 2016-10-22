@@ -78,7 +78,7 @@ App.get('/new',(req,res)=>{
 	res.redirect('/dev');
 });
 App.post('/new',(req,res)=>{
-	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the master ones
+	if(req.body.username == process.env.adminUsername && req.body.password == process.env.adminPassword) // Verifying that the inputed credentials match the master ones
 		res.render("new",{});
 	else
 		res.redirect('/dev');
