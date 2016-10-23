@@ -1,2 +1,6 @@
 articles.txt
 node_modules
+*.un~
+pd.txt
+npm-debug.log
+*.swp
