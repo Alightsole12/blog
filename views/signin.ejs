@@ -6,7 +6,7 @@
 	<body>
 		<h1>RESTRICTED AREA</h1>
 		<!-- Looking for a way in, are we? -->
-		<form action='/new' method='POST'>
+		<form action='/<%= target %>' method='POST'>
 			<input name='username' type='text'/>
 			<br/>
 			<br/>
@@ -14,6 +14,7 @@
 			<br/>
 			<br/>
 			<input name='submit' type='submit' value='Submit'/>
+			<%= target %>
 		</form>
 	</body>
 </html>
