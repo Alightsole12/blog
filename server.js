@@ -1,3 +1,4 @@
+// BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -31,9 +32,8 @@ App.get('/',(req,res)=>{
 });
 
 // The main blog page
-App.get('/blog',(req,res)=>{ // This is a good idea: http://www.nodejsconnect.com/blog/archive/201608
+App.get('/blog',(req,res)=>{
 	fs.readFile("data/recent.json","utf-8",(err,data)=>{
-		// Get query string, if 2 grab next 5 from index etc
 		const recent = JSON.parse(data).recent;
 		console.log(`URL Query: ${req.query.page}`);
 		console.log(recent[0]);
@@ -47,8 +47,7 @@ App.get('/blog',(req,res)=>{ // This is a good idea: http://www.nodejsconnect.co
 });
 
 // A specific blog post
-App.get('/blog/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
-	// BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
+App.get('/blog/post/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
 	const urlData = req.url.split("/");
 	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
 	const renderPost = ()=>{
@@ -70,18 +69,23 @@ App.get('/404',(req,res)=>{
 	res.render("404",{"pun":punArray[Math.floor(Math.random()*punArray.length)]});
 });
 
-App.get('/dev',(req,res)=>{
-	res.render("dev",{});
+App.get('/signin',(req,res)=>{
+	const target = req.query.target; // Finding out where to redirect to after signing in
+	res.render("signin",{"target":target});
 });
 
-App.get('/new',(req,res)=>{
-	res.redirect('/dev');
+App.get('/blog/new',(req,res)=>{
+	res.redirect('/signin?target=blog/new');
 });
-App.post('/new',(req,res)=>{
-	if(req.body.username == process.env.adminUsername && req.body.password == process.env.adminPassword) // Verifying that the inputed credentials match the master ones
-		res.render("new",{});
+App.post('/blog/new',(req,res)=>{
+	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+		res.render("blog_new",{});
 	else
-		res.redirect('/dev');
+		res.redirect('/signin');
+});
+
+App.get('/blog/edit',(req,res)=>{
+	res.redirect('/blog/dev');
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
