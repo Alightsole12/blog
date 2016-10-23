@@ -74,17 +74,18 @@ App.get('/404',(req,res)=>{
 	//res.render("dev",{});
 //});
 App.get('/signin',(req,res)=>{
-	res.send("Signin");
+	const target = req.query.target; // Finding out where to redirect to after signing in
+	res.render("signin",{"target":target});
 });
 
 App.get('/blog/new',(req,res)=>{
-	res.render('/signin?target=blog_new',{}); // ISSUE: express seems to think this is a seperate file rather than one with query data
+	res.redirect('/signin?target=blog/new'); // ISSUE: express seems to think this is a seperate file rather than one with query data
 });
 App.post('/blog/new',(req,res)=>{
-	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the master ones
+	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
-		res.redirect('/blog/dev');
+		res.redirect('/signin');
 });
 
 App.get('/blog/edit',(req,res)=>{
