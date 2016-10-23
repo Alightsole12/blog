@@ -81,11 +81,14 @@ App.post('/blog/new',(req,res)=>{
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
-		res.redirect('/signin');
+		res.redirect('/signin?target=blog/new');
 });
 
 App.get('/blog/edit',(req,res)=>{
-	res.redirect('/blog/dev');
+	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+		res.render("blod_edit",{});
+	else
+		res.redirect('/signin?target=blog/edit');
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
