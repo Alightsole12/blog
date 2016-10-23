@@ -47,7 +47,7 @@ App.get('/blog',(req,res)=>{
 });
 
 // A specific blog post
-App.get('/blog/post/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
+App.get('/blog/post/*',(req,res)=>{
 	const urlData = req.url.split("/");
 	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
 	const renderPost = ()=>{
