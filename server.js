@@ -79,6 +79,7 @@ App.get('/blog/new',(req,res)=>{
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
+	console.log(req.files.task);
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else

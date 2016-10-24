@@ -5,10 +5,10 @@
 	<body>
 		<h1>Create a New Post</h1>
 		<hr/>
-		<form>
+		<form action='/blog/new' method='post' enctype='multipart/form-data'>
 			<input class='post_title' name='post_title' type='text' placeholder='Title...'/>
 			<br/>
-			<!-- Upload button here -->
+			<input class='post_upload' name='post_upload' type='file'/>
 			<br/>
 			<input class='post_submit' name='post_submit' type='submit' value='Post'/>
 		</form>
