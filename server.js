@@ -5,6 +5,7 @@ const http = require('http'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs'),
+	multer = require('multer'),
 	pg = require('pg');
 
 const ip = '192.168.2.9';
@@ -23,6 +24,7 @@ App.set('views','./views');
 App.use(express.static('public'));
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
+App.use(multer({dest:'./uploads'}).any()); // We may need to change this in the future
 App.set('view engine','ejs');
 
 // Routing
@@ -79,7 +81,7 @@ App.get('/blog/new',(req,res)=>{
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
-	console.log(req.files.task);
+	console.log(req.files);
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
