@@ -4,3 +4,4 @@ node_modules
 pd.txt
 npm-debug.log
 *.swp
+uploads
