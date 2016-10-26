@@ -5,6 +5,7 @@ const http = require('http'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	ejs = require('ejs'),
+	multer = require('multer'),
 	pg = require('pg');
 
 const ip = '192.168.2.9';
@@ -23,6 +24,7 @@ App.set('views','./views');
 App.use(express.static('public'));
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
+App.use(multer({dest:'./uploads'}).any()); // We may need to change this in the future
 App.set('view engine','ejs');
 
 // Routing
@@ -47,7 +49,7 @@ App.get('/blog',(req,res)=>{
 });
 
 // A specific blog post
-App.get('/blog/post/*',(req,res)=>{ //needs some sort of fs file finder to send json for aside for ejs preprocessing
+App.get('/blog/post/*',(req,res)=>{
 	const urlData = req.url.split("/");
 	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
 	const renderPost = ()=>{
@@ -65,7 +67,7 @@ App.get('/blog/post/*',(req,res)=>{ //needs some sort of fs file finder to send 
 
 // A standard 404 page
 App.get('/404',(req,res)=>{
-	var punArray = ["A friend of mine tried to annoy me with bird puns, but I soon realized that toucan play at that game.", "Have you ever tried to eat a clock? It's very time consuming.", "Police were called to a daycare where a three-year-old was resisting a rest.", "I couldn't quite remember how to throw a boomerang, but eventually it came back to me.", "Simba was walking too slow, so I told him to Mufasa.", "Why is Peter Pan always flying? He neverlands! I love this joke because it never grows old.", "Jokes with punch lines can be painfully funny.", "A man died today when a pile of books fell on him. He only had his shelf to blame.", "What do you call a dinosaur with an extensive vocabulary? A Thesaurus.", "What happens when four children lock themselves in a wardrobe? That's narnia business..", "Why was Cinderella thrown off the basketball team? She ran away from the ball.", "My first job was working in an orange juice factory, but I got canned: couldn't concentrate.", "I wanna make a joke about sodium, but Na..", "Did you hear about the Italian chef with a terminal illness? He pastaway.", "An expensive laxative will give you a run for your money.", "I never understood odourless chemicals, they never make scents.", "Never trust an atom, they make up everything!", "When two vegetarians are arguing, is it still considered beef?", "I stayed up all night to see where the sun went. Then it dawned on me.", "When life gives you melons, you're probably dyslexic.", "I make apocalypse jokes like there's no tomorrow.", "No matter how hard you push the envelope it will still be stationery.", "What tea do hockey players drink? Penaltea!", "Did you hear about the guy who got hit in the head with a can of soda? He was lucky it was a soft drink.", "I was trying to make a pun about escaping quicksand but I'm stuck.", "The rotation of the earth really makes my day!"];
+	const punArray = ["A friend of mine tried to annoy me with bird puns, but I soon realized that toucan play at that game.", "Have you ever tried to eat a clock? It's very time consuming.", "Police were called to a daycare where a three-year-old was resisting a rest.", "I couldn't quite remember how to throw a boomerang, but eventually it came back to me.", "Simba was walking too slow, so I told him to Mufasa.", "Why is Peter Pan always flying? He neverlands! I love this joke because it never grows old.", "Jokes with punch lines can be painfully funny.", "A man died today when a pile of books fell on him. He only had his shelf to blame.", "What do you call a dinosaur with an extensive vocabulary? A Thesaurus.", "What happens when four children lock themselves in a wardrobe? That's narnia business..", "Why was Cinderella thrown off the basketball team? She ran away from the ball.", "My first job was working in an orange juice factory, but I got canned: couldn't concentrate.", "I wanna make a joke about sodium, but Na..", "Did you hear about the Italian chef with a terminal illness? He pastaway.", "An expensive laxative will give you a run for your money.", "I never understood odourless chemicals, they never make scents.", "Never trust an atom, they make up everything!", "When two vegetarians are arguing, is it still considered beef?", "I stayed up all night to see where the sun went. Then it dawned on me.", "When life gives you melons, you're probably dyslexic.", "I make apocalypse jokes like there's no tomorrow.", "No matter how hard you push the envelope it will still be stationery.", "What tea do hockey players drink? Penaltea!", "Did you hear about the guy who got hit in the head with a can of soda? He was lucky it was a soft drink.", "I was trying to make a pun about escaping quicksand but I'm stuck.", "The rotation of the earth really makes my day!"];
 	res.render("404",{"pun":punArray[Math.floor(Math.random()*punArray.length)]});
 });
 
@@ -75,17 +77,29 @@ App.get('/signin',(req,res)=>{
 });
 
 App.get('/blog/new',(req,res)=>{
-	res.redirect('/signin?target=blog/new');
+	res.render("blog_new",{});
+	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
+	console.log(req.files);
+	fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
+		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
+		fs.readFile('./uploads/'+req.files[0].originalname,'utf8',(err,data)=>{
+			// Callback hell!
+			console.log(data);
+		});
+	});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
-		res.redirect('/signin');
+		res.redirect('/signin?target=blog/new');
 });
 
 App.get('/blog/edit',(req,res)=>{
-	res.redirect('/blog/dev');
+	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+		res.render("blod_edit",{});
+	else
+		res.redirect('/signin?target=blog/edit');
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
