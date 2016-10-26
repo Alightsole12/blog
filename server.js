@@ -84,6 +84,10 @@ App.post('/blog/new',(req,res)=>{
 	console.log(req.files);
 	fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
 		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
+		fs.readFile('./uploads/'+req.files[0].originalname,'utf8',(err,data)=>{
+			// Callback hell!
+			console.log(data);
+		});
 	});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
