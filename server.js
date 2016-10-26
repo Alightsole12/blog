@@ -10,14 +10,16 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
-/* // Comment out for dev
-const client = new pg.Client(process.env.databaseLink); // Making a new client
-client.connect(); // Connecting to the database
-const query = client.query( // Making the query
-	'CREATE TABLE test()'
-);
-query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-*/
+const debug = process.env.databaseLink || true;
+
+if(!debug){
+	const client = new pg.Client(process.env.databaseLink); // Making a new client
+	client.connect(); // Connecting to the database
+	const query = client.query( // Making the query
+		'CREATE TABLE blog()'
+	);
+	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
+}
 // App Setup
 const App = express();
 App.set('views','./views');
@@ -86,6 +88,7 @@ App.post('/blog/new',(req,res)=>{
 		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
 		fs.readFile('./uploads/'+req.files[0].originalname,'utf8',(err,data)=>{
 			// Callback hell!
+			client.connect()
 			console.log(data);
 		});
 	});
