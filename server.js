@@ -82,6 +82,9 @@ App.get('/blog/new',(req,res)=>{
 });
 App.post('/blog/new',(req,res)=>{
 	console.log(req.files);
+	fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
+		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
+	});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
