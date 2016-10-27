@@ -15,8 +15,12 @@ const debug = process.env.databaseLink || true;
 if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
 	client.connect(); // Connecting to the database
-	const query = client.query( // Making the query
-		'CREATE TABLE bloga()'
+	const query = client.query( // Making the query // Title, txt link on server, date posted, 
+		`CREATE TABLE blog(
+			title varchar(255),
+			date date,
+			link varchar(255)
+		)`
 	);
 	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 }
