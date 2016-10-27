@@ -16,7 +16,7 @@ if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
 	client.connect(); // Connecting to the database
 	const query = client.query( // Making the query
-		'CREATE TABLE blog()'
+		'CREATE TABLE bloga()'
 	);
 	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 }
