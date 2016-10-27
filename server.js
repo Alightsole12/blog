@@ -10,7 +10,7 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
-const debug = process.env.databaseLink || true;
+const debug = process.env.debug || true;
 
 if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
@@ -20,7 +20,7 @@ if(!debug){
 			title varchar(255),
 			date date,
 			link varchar(255)
-		)`
+		);`
 	);
 	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 }
