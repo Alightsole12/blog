@@ -17,7 +17,7 @@ function parseBool(str){
 	else
 		return true;
 }
-const debug = process.env.debug || true;
+var debug = process.env.debug || true;
 if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
