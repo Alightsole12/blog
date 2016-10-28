@@ -18,8 +18,8 @@ function parseBool(str){
 		return true;
 }
 const debug = process.env.debug || true;
-if(process.env.debug)
-	debug = parseBool(process.env.debug);
+if(typeof debug == 'string')
+	debug = false;
 const finish = typeof debug;
 
 if(!debug){ // MUST STILL BE A STRING OR SOMETHING?
