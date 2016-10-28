@@ -20,9 +20,9 @@ function parseBool(str){
 const debug = process.env.debug || true;
 if(process.env.debug)
 	debug = parseBool(process.env.debug);
-const finish = debug;
+const finish = typeof debug;
 
-if(!debug){
+if(!debug){ // MUST STILL BE A STRING OR SOMETHING?
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
 	client.connect(); // Connecting to the database
 	const query = client.query( // Making the query // Title, txt link on server, date posted, 
