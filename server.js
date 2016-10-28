@@ -10,14 +10,16 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
-function parseBool(bool){
-	let bool = bool.toLowerCase();
-	if(bool == 'false')
-		bool = false;
+function parseBool(str){
+	str = str.toLowerCase();
+	if(str == 'false')
+		return false;
 	else
-		bool = true;
+		return true;
 }
-const debug = parseBool(process.env.debug) || true;
+const debug = process.env.debug || true;
+if(process.env.debug)
+	debug = parseBool(process.env.debug);
 
 if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
