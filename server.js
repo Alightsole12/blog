@@ -20,6 +20,7 @@ function parseBool(str){
 const debug = process.env.debug || true;
 if(process.env.debug)
 	debug = parseBool(process.env.debug);
+const finish = debug;
 
 if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
@@ -32,8 +33,8 @@ if(!debug){
 		);`
 	);
 	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-	const finish = "COMPLETE";
 }
+
 // App Setup
 const App = express();
 App.set('views','./views');
