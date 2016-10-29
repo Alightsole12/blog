@@ -94,20 +94,13 @@ App.post('/blog/new',(req,res)=>{
 	console.log(req.files);
 	fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
 		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
-		console.log(req.body.post_title); // Logging the title
 		const date = new Date();
-		console.log(`${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`); // Logging the current date
-		console.log("./uploads/"+req.files[0].originalname);
-		// TODO: Test this out on the prod server
-		/*client.connect();
+		client.connect();
 		var query = client.query(
-			`CREATE TABLE blog(
-				title varchar(255),
-				date date,
-				link varchar(255)
-			);`
+			`INSERT INTO blog(title,date,link)
+				VALUES(${req.body.post_title},${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000},./uploads/${req.files[0].originalname});`
 		);
-		query.on('end',()=>{client.end();}); // Once the query is complete, the client will close*/
+		query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 	});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
