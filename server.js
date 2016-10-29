@@ -10,29 +10,22 @@ const http = require('http'),
 
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
-function parseBool(str){
-	str = str.toLowerCase();
-	if(str == 'false')
-		return false;
-	else
-		return true;
-}
 var debug = process.env.debug || true;
 if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
 
-if(!debug){ // MUST STILL BE A STRING OR SOMETHING?
+if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
-	client.connect(); // Connecting to the database
-	const query = client.query( // Making the query // Title, txt link on server, date posted, 
-		`CREATE TABLE blog(
-			title varchar(255),
-			date date,
-			link varchar(255)
-		);`
-	);
-	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
+	//client.connect(); // Connecting to the database
+	//const query = client.query( // Making the query // Title, txt link on server, date posted, 
+		//`CREATE TABLE blog(
+			//title varchar(255),
+			//date date,
+			//link varchar(255)
+		//);`
+	//);
+	//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 }
 
 // App Setup
@@ -101,11 +94,13 @@ App.post('/blog/new',(req,res)=>{
 	console.log(req.files);
 	fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
 		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
-		fs.readFile('./uploads/'+req.files[0].originalname,'utf8',(err,data)=>{
-			// Callback hell!
-			client.connect()
-			console.log(data);
-		});
+		const date = new Date();
+		client.connect();
+		var query = client.query(
+			`INSERT INTO blog(title,date,link)
+				VALUES(${req.body.post_title},${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000},./uploads/${req.files[0].originalname});`
+		);
+		query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 	});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
