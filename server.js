@@ -97,8 +97,8 @@ App.post('/blog/new',(req,res)=>{
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
 	client.connect();
 	var query = client.query(
-		`INSERT INTO blog(title,date,link)
-			VALUES(${req.body.post_title},${currentDate},./uploads/${req.files[0].originalname});`
+		`INSERT INTO blog (title,date,link)
+			VALUES (${req.body.post_title},${currentDate},./uploads/${req.files[0].originalname});`
 	);
 	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 	finish = "We hit the end of the code block!";
