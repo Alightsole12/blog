@@ -13,7 +13,7 @@ var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
 if(typeof debug == 'string')
 	debug = false;
-const finish = typeof debug;
+var finish = typeof debug;
 
 if(!debug){
 	const client = new pg.Client(process.env.databaseLink); // Making a new client
@@ -101,6 +101,7 @@ App.post('/blog/new',(req,res)=>{
 			VALUES(${req.body.post_title},${currentDate},./uploads/${req.files[0].originalname});`
 	);
 	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
+	finish = "We hit the end of the code block!";
 	//});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
