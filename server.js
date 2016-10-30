@@ -91,17 +91,17 @@ App.get('/blog/new',(req,res)=>{
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
-	console.log(req.files);
-	fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
-		console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
-		const date = new Date();
-		client.connect();
-		var query = client.query(
-			`INSERT INTO blog(title,date,link)
-				VALUES(${req.body.post_title},${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000},./uploads/${req.files[0].originalname});`
-		);
-		query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-	});
+	//fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
+		//console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
+	const date = new Date();
+	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
+	client.connect();
+	var query = client.query(
+		`INSERT INTO blog(title,date,link)
+			VALUES(${req.body.post_title},${currentDate},./uploads/${req.files[0].originalname});`
+	);
+	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
+	//});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
