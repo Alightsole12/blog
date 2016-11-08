@@ -8,6 +8,7 @@ const http = require('http'),
 	multer = require('multer'),
 	pg = require('pg');
 
+// SET ENV VARIABLES
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
@@ -15,18 +16,16 @@ if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
 
-if(!debug){
-	const client = new pg.Client(process.env.databaseLink); // Making a new client
-	//client.connect(); // Connecting to the database
-	//const query = client.query( // Making the query // Title, txt link on server, date posted, 
-		//`CREATE TABLE blog(
-			//title varchar(255),
-			//date date,
-			//link varchar(255)
-		//);`
-	//);
-	//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-}
+const client = new pg.Client(process.env.databaseLink+"?ssl=true"); // Making a new client
+//client.connect(); // Connecting to the database
+//const query = client.query( // Making the query // Title, txt link on server, date posted, 
+	//`CREATE TABLE blog(
+		//title varchar(255),
+		//date date,
+		//link varchar(255)
+	//);`
+//);
+//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 
 // App Setup
 const App = express();
@@ -91,17 +90,23 @@ App.get('/blog/new',(req,res)=>{
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
-	//fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
-		//console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	client.connect();
-	var query = client.query(
-		`INSERT INTO blog(title,date,link)
-			VALUES(${req.body.post_title},${currentDate},./uploads/${req.files[0].originalname});`
-	);
-	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-	//});
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(
+			`INSERT INTO blog(title,date,body)
+			VALUES('${req.body.post_title}','${currentDate}','${req.body.post_body}');`
+		);
+		query.on('row',(row)=>{
+			console.log("Row recieved: "+row.title);
+		});
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+		});
+	});
 	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
 		res.render("blog_new",{});
 	else
