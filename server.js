@@ -4,6 +4,7 @@ const http = require('http'),
 	fs = require('fs'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
+	helmet = require('helmet'),
 	ejs = require('ejs'),
 	multer = require('multer'),
 	pg = require('pg');
@@ -33,6 +34,7 @@ App.set('views','./views');
 App.use(express.static('public'));
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
+App.use(helmet());
 App.use(multer({dest:'./uploads'}).any()); // We may need to change this in the future
 App.set('view engine','ejs');
 
@@ -90,34 +92,56 @@ App.get('/blog/new',(req,res)=>{
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
+	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	console.log("Connecting to the database...");
-	client.connect((err)=>{
-		console.log("Connection success, querying in progress...");
-		var query = client.query(
-			`INSERT INTO blog(title,date,body)
-			VALUES('${req.body.post_title}','${currentDate}','${req.body.post_body}');`
-		);
-		query.on('row',(row)=>{
-			console.log("Row recieved: "+row.title);
+	var postTitle = req.body.post_title.replace("\'","&apos;").replace("\"","&quot");
+	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot");
+	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
+		console.log("Data Sanitization Complete.");
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(
+				`INSERT INTO blog(title,date,body)
+				VALUES('${postTitle}','${currentDate}','${postBody}');`
+			);
+			query.on('row',(row)=>{
+				console.log("Row recieved: "+JSON.stringify(row));
+			});
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+			});
 		});
-		query.on('end',()=>{ // Once the query is complete, the client will close
-			client.end();
-			console.log("Query complete, Connection terminated.");
-		});
-	});
-	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
-		res.render("blog_new",{});
-	else
-		res.redirect('/signin?target=blog/new');
+		if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+			res.render("blog_new",{});
+		else
+			res.redirect('/signin?target=blog/new');
+	}else{
+		console.log("Error: post_title or post_body exceeded character limit")
+	}
 });
 
-App.get('/blog/edit',(req,res)=>{
-	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
-		res.render("blod_edit",{});
-	else
-		res.redirect('/signin?target=blog/edit');
+App.get('/blog/edit',(req,res)=>{ // Should be able to get all the current posts from database
+	//if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones		
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(
+				`SELECT * FROM blog`
+			);
+			query.on('row',(row)=>{
+				console.log("Row recieved: "+JSON.stringify(row));
+			});
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+			});
+		});
+		res.render("blog_edit",{});
+	//else
+		//res.redirect('/signin?target=blog/edit');
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
