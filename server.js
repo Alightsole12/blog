@@ -17,7 +17,6 @@ if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
 
-const client = new pg.Client(process.env.databaseLink+"?ssl=true"); // Making a new client
 //client.connect(); // Connecting to the database
 //const query = client.query( // Making the query // Title, txt link on server, date posted, 
 	//`CREATE TABLE blog(
@@ -99,6 +98,7 @@ App.post('/blog/new',(req,res)=>{
 	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot");
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
 		console.log("Data Sanitization Complete.");
+		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 		console.log("Connecting to the database...");
 		client.connect((err)=>{
 			console.log("Connection success, querying in progress...");
@@ -123,8 +123,10 @@ App.post('/blog/new',(req,res)=>{
 	}
 });
 
-App.get('/blog/edit',(req,res)=>{ // Should be able to get all the current posts from database
-	//if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones		
+App.get('/blog/edit',(req,res)=>{
+	//if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+		var postsArray = [];
+		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 		console.log("Connecting to the database...");
 		client.connect((err)=>{
 			console.log("Connection success, querying in progress...");
@@ -132,14 +134,16 @@ App.get('/blog/edit',(req,res)=>{ // Should be able to get all the current posts
 				`SELECT * FROM blog`
 			);
 			query.on('row',(row)=>{
+				postsArray.push(row);
 				console.log("Row recieved: "+JSON.stringify(row));
 			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
 				client.end();
 				console.log("Query complete, Connection terminated.");
+				res.render("blog_edit",{"postsArray":postsArray});
+				console.log(JSON.stringify(postsArray));
 			});
 		});
-		res.render("blog_edit",{});
 	//else
 		//res.redirect('/signin?target=blog/edit');
 });
