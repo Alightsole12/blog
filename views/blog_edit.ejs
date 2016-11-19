@@ -6,29 +6,25 @@
 	<body>
 		<h1>Edit a Post</h1>
 		<hr/>
-		<!-- This is what they should all look like -->
-		<div class='edit_preview'>
-			<h2 class='edit_title'>Post Title Here</h2>
-			<p class='edit_body'>Post Body Preview Here</p>
-			<p><span class='edit_date'>Date Posted: Date Here</span></p>
-			<ul class='edit_gui'>
-				<li><a>Edit</a></li>
-				<li><a>View</a></li>
-				<li><a>Stats</a></li>
-				<li><a>Private</a></li>
-				<li><a>Remove</a></li>
-			</ul>
-		</div>
-		<form action='/blog/edit' method='POST'>
-			<% for(var i = 0; i < postsArray.length; i++){ %>
-				<!-- This is where the each post is parsed -->
-				<div class='post'>
-				<% for(property in postsArray[i]){ %>
-					<!-- This is where the individual parts of the post are parsed -->
-					<% console.log(postsArray[i][property]); %>
-				<% } %>
+		<% for(var i = 0; i < postsArray.length; i++){ %>
+			<div>
+				<div class='edit_preview'>
+					<h2 class='edit_title'><%= postsArray[i].title %></h2>
+					<p class='edit_body'><%= postsArray[i].body %></p>
+					<p><span class='edit_date'>Date Posted: <%= postsArray[i].date %></span></p>
 				</div>
-			<% } %>
-		</form>
+				<div class='edit_wrapper'>
+					<ul class='edit_gui'>
+						<a><li>Edit</li></a>
+						<a><li>View</li></a>
+						<a><li>Stats</li></a>
+						<a><li>Private</li></a>
+						<a><li>Remove</li></a>
+					</ul>
+				</div>
+			</div>
+		<% } %>
+		<div class='footer'>
+		</div>
 	</body>
 </html>
