@@ -18,10 +18,27 @@
 	margin 0
 	padding 0
 	overflow hidden
-	a
-		display inline-block
-		text-align center
-		padding-top 1em
-		padding-bottom 1em
-		width 19%
-		color Gray
+	li
+		display inline
+		input[type='submit']
+			text-align center
+			padding-top 1em
+			padding-bottom 1em
+			width 19%
+			color black
+			// Making it look like a link
+			background 0
+			border 0
+			cursor pointer
+			&:hover
+				font-weight bold
+		#edit:hover
+			color lime
+		#view:hover
+			color blue
+		#stats:hover
+			color orange
+		#private:hover
+			color gray
+		#remove:hover
+			color red

@@ -106,9 +106,6 @@ App.post('/blog/new',(req,res)=>{
 				`INSERT INTO blog(title,date,body)
 				VALUES('${postTitle}','${currentDate}','${postBody}');`
 			);
-			query.on('row',(row)=>{
-				console.log("Row recieved: "+JSON.stringify(row));
-			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
 				client.end();
 				console.log("Query complete, Connection terminated.");
@@ -119,7 +116,8 @@ App.post('/blog/new',(req,res)=>{
 		else
 			res.redirect('/signin?target=blog/new');
 	}else{
-		console.log("Error: post_title or post_body exceeded character limit")
+		console.log("Error: post_title or post_body exceeded character limit");
+		res.render('blog_new',{error:"Error: post_title or post_body exceeded character limit"});
 	}
 });
 
@@ -134,8 +132,9 @@ App.get('/blog/edit',(req,res)=>{
 				`SELECT * FROM blog`
 			);
 			query.on('row',(row)=>{
+				row.title = row.title.replace("&apos;","\'").replace("&quot","\"");
+				row.body = row.body.replace("&apos;","\'").replace("&quot","\"");
 				postsArray.push(row);
-				console.log("Row recieved: "+JSON.stringify(row));
 			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
 				client.end();
@@ -146,6 +145,29 @@ App.get('/blog/edit',(req,res)=>{
 		});
 	//else
 		//res.redirect('/signin?target=blog/edit');
+});
+App.post('/blog/edit',(req,res)=>{
+	console.log("Submitted data",req.body.submit, req.body.post_name);
+	// Build queryString here
+	switch(req.body.submit){
+		case 'Remove':
+			const queryString = "DELETE FROM blog WHERE title='"+req.body.post_name+"';";
+			break;
+		default:
+			console.log("Error: Invalid Request");
+			break;
+	}
+	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(queryString);
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+			res.redirect('/blog/edit');
+		});
+	});
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
