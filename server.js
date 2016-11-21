@@ -4,10 +4,12 @@ const http = require('http'),
 	fs = require('fs'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
+	helmet = require('helmet'),
 	ejs = require('ejs'),
 	multer = require('multer'),
 	pg = require('pg');
 
+// SET ENV VARIABLES
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
@@ -15,18 +17,15 @@ if(typeof debug == 'string')
 	debug = false;
 var finish = typeof debug;
 
-if(!debug){
-	const client = new pg.Client(process.env.databaseLink); // Making a new client
-	//client.connect(); // Connecting to the database
-	//const query = client.query( // Making the query // Title, txt link on server, date posted, 
-		//`CREATE TABLE blog(
-			//title varchar(255),
-			//date date,
-			//link varchar(255)
-		//);`
-	//);
-	//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-}
+//client.connect(); // Connecting to the database
+//const query = client.query( // Making the query // Title, txt link on server, date posted, 
+	//`CREATE TABLE blog(
+		//title varchar(255),
+		//date date,
+		//link varchar(255)
+	//);`
+//);
+//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 
 // App Setup
 const App = express();
@@ -34,6 +33,7 @@ App.set('views','./views');
 App.use(express.static('public'));
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
+App.use(helmet());
 App.use(multer({dest:'./uploads'}).any()); // We may need to change this in the future
 App.set('view engine','ejs');
 
@@ -91,30 +91,83 @@ App.get('/blog/new',(req,res)=>{
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
-	//fs.rename('./uploads/'+req.files[0].filename, './uploads/'+req.files[0].originalname,()=>{
-		//console.log(`File '${req.files[0].filename}' successfully renamed to '${req.files[0].originalname}'`);
+	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	client.connect();
-	var query = client.query(
-		`INSERT INTO blog (title,date,link)
-			VALUES (${req.body.post_title},${currentDate},./uploads/${req.files[0].originalname});`
-	);
-	query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-	finish = "We hit the end of the code block!";
-	//});
-	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
-		res.render("blog_new",{});
-	else
-		res.send(finish);
-		//res.redirect('/signin?target=blog/new');
+	var postTitle = req.body.post_title.replace("\'","&apos;").replace("\"","&quot");
+	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot");
+	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
+		console.log("Data Sanitization Complete.");
+		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(
+				`INSERT INTO blog(title,date,body)
+				VALUES('${postTitle}','${currentDate}','${postBody}');`
+			);
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+			});
+		});
+		if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+			res.render("blog_new",{});
+		else
+			res.redirect('/signin?target=blog/new');
+	}else{
+		console.log("Error: post_title or post_body exceeded character limit");
+		res.render('blog_new',{error:"Error: post_title or post_body exceeded character limit"});
+	}
 });
 
 App.get('/blog/edit',(req,res)=>{
-	if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
-		res.render("blod_edit",{});
-	else
-		res.redirect('/signin?target=blog/edit');
+	//if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+		var postsArray = [];
+		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(
+				`SELECT * FROM blog`
+			);
+			query.on('row',(row)=>{
+				row.title = row.title.replace("&apos;","\'").replace("&quot","\"");
+				row.body = row.body.replace("&apos;","\'").replace("&quot","\"");
+				postsArray.push(row);
+			});
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+				res.render("blog_edit",{"postsArray":postsArray});
+				console.log(JSON.stringify(postsArray));
+			});
+		});
+	//else
+		//res.redirect('/signin?target=blog/edit');
+});
+App.post('/blog/edit',(req,res)=>{
+	console.log("Submitted data",req.body.submit, req.body.post_name);
+	// Build queryString here
+	switch(req.body.submit){
+		case 'Remove':
+			const queryString = "DELETE FROM blog WHERE title='"+req.body.post_name+"';";
+			break;
+		default:
+			console.log("Error: Invalid Request");
+			break;
+	}
+	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(queryString);
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+			res.redirect('/blog/edit');
+		});
+	});
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here

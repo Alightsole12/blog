@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/css/styles.css">
+	</head>
+	<body>
+		<h1>Edit a Post</h1>
+		<hr/><!-- POSTS CANNOT BE NAMED THE SAME THING -->
+		<% for(var i = 0; i < postsArray.length; i++){ %>
+			<form action='/blog/edit' method='POST'>
+				<input style='visibility:hidden;' name="post_name" value="<%= postsArray[i].title %>"/>
+				<div>
+					<div class='edit_preview'>
+						<h2 class='edit_title'><%= postsArray[i].title %></h2>
+						<p class='edit_body'><%= postsArray[i].body %></p>
+						<p><span class='edit_date'>Date Posted: <%= postsArray[i].date %></span></p>
+					</div>
+					<div class='edit_wrapper'>
+						<ul class='edit_gui'>
+							<li><input id='edit' type="submit" name="submit" value='Edit'></li>
+							<li><input id='view' type='submit' name='submit' value='View'></li>
+							<li><input id='stats' type='submit' name='submit' value='Stats'></li>
+							<li><input id='private' type='submit' name='submit' value='Private'></li>
+							<li><input id='remove' type='submit' name='submit' value='Remove'></li>
+						</ul>
+					</div>
+				</div>
+			</form>
+		<% } %>
+		<div class='footer'>
+		</div>
+	</body>
+</html>
