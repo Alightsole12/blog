@@ -140,7 +140,6 @@ App.get('/blog/edit',(req,res)=>{
 				client.end();
 				console.log("Query complete, Connection terminated.");
 				res.render("blog_edit",{"postsArray":postsArray});
-				console.log(JSON.stringify(postsArray));
 			});
 		});
 	//else
@@ -148,24 +147,53 @@ App.get('/blog/edit',(req,res)=>{
 });
 App.post('/blog/edit',(req,res)=>{
 	console.log("Submitted data",req.body.submit, req.body.post_name);
-	// Build queryString here
+	invalidRequest = false;	
 	switch(req.body.submit){
+		case 'Edit':
+			invalidRequest = true;
+			res.redirect('/blog/edit_post?id='+req.body.post_name);
+			break;
 		case 'Remove':
 			const queryString = "DELETE FROM blog WHERE title='"+req.body.post_name+"';";
 			break;
 		default:
 			console.log("Error: Invalid Request");
+			invalidRequest = true;
+			res.redirect('/blog/edit');
 			break;
 	}
+	if(!invalidRequest){ // Note: This'll probably be removed after we finish the other requests
+		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(queryString);
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+				res.redirect('/blog/edit');
+			});
+		});
+	}
+});
+
+App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
+	console.log(req.query.id);
+	var postData;
+	const queryString = `SELECT * FROM blog WHERE title='${req.query.id}';`;
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(queryString);
+		query.on('row',(row)=>{
+			postData = row;
+			console.log(postData);
+		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			res.redirect('/blog/edit');
+			res.render('edit_post',{"postsArray":postData});
 		});
 	});
 });

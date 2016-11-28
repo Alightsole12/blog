@@ -1,13 +1,15 @@
 <!doctype html>
 <html>
 	<head>
-		<link rel="stylesheet" type="text/css" href="/css/styles.css">
+		<link rel="stylesheet" type="text/css" href="/css/styles.css"/>
+		<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js'></script>
+		<script type="text/javascript" src='/js/scripts.js'></script>
 	</head>
-	<body>
+	<body ng-app='BlogApp'>
 		<h1>Edit a Post</h1>
 		<hr/><!-- POSTS CANNOT BE NAMED THE SAME THING -->
 		<% for(var i = 0; i < postsArray.length; i++){ %>
-			<form action='/blog/edit' method='POST'>
+			<form action='/blog/edit' method='POST' ng-controller='EditController'>
 				<input style='visibility:hidden;' name="post_name" value="<%= postsArray[i].title %>"/>
 				<div>
 					<div class='edit_preview'>
