@@ -8,11 +8,10 @@
 	<body ng-controller='EditController'>
 		<h1>Edit <%= postData.title %></h1>
 		<hr/>
-		<form action='/blog/edit_post' method='POST'>
-			<input class='post_title' name='post_title' type='text' placeholder='Post Title...' ng-value='<%= postData.title %>'/>
-			<%= postData.title %>
+		<form action='/blog/edit_post?old_title=<%= postData.title %>' method='POST'>
+			<input class='post_title' name='post_title' type='text' placeholder='Post Title...' ng-value='data.data.title'/>
 			<br/>
-			<textarea class='post_body' name='post_body' placeholder="Post Body..." rows="20" cols="50" value='<% postData.body %>'></textarea>
+			<textarea class='post_body' name='post_body' placeholder="Post Body..." rows="20" cols="50">{{data.data.body}}</textarea>
 			<br/>
 			<input class='post_submit' name='post_submit' type='submit' value='Post'/>
 		</form>		

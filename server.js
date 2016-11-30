@@ -193,9 +193,39 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			res.render('edit_post',{"postData":postData});
+			if(typeof postData == 'undefined'){
+				res.redirect('/blog/edit');
+			}else{
+				res.render('edit_post',{"postData":postData});
+			}
 		});
 	});
+});
+App.post('/blog/edit_post?*',(req,res)=>{
+	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(`
+			UPDATE blog
+			SET title='',body=''
+			WHERE title='';
+		`);
+		query.on('row',(row)=>{
+			postData = row;
+			console.log(postData);
+		});
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+			if(typeof postData == 'undefined'){
+				res.redirect('/blog/edit');
+			}else{
+				res.render('edit_post',{"postData":postData});
+			}
+		});
+	});
+	res.redirect('/blog/edit');
 });
 
 // API
