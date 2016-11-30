@@ -1,3 +1,3 @@
-BlogApp.controller('EditController',($scope)=>{
-	$scope.foo = 7;
+BlogApp.controller('EditController',($scope,$http)=>{
+	// Do some http grabbing here
 });

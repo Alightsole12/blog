@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html ng-app='BlogApp'>
+	<head>
+		<title>Editing <%= postData.title %>...</title>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+		<script type="text/javascript" src='/js/scripts.js'></script>
+	</head>
+	<body ng-controller='EditController'>
+		<h1>Edit <%= postData.title %></h1>
+		<hr/>
+		<form action='/blog/edit_post' method='POST'>
+			<input class='post_title' name='post_title' type='text' placeholder='Post Title...' ng-value='<%= postData.title %>'/>
+			<%= postData.title %>
+			<br/>
+			<textarea class='post_body' name='post_body' placeholder="Post Body..." rows="20" cols="50" value='<% postData.body %>'></textarea>
+			<br/>
+			<input class='post_submit' name='post_submit' type='submit' value='Post'/>
+		</form>		
+	</body>
+</html>

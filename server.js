@@ -193,9 +193,48 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			res.render('edit_post',{"postsArray":postData});
+			res.render('edit_post',{"postData":postData});
 		});
 	});
+});
+
+// API
+App.get('/api',(req,res)=>{
+	console.log(req.query.post_title);
+	if(typeof req.query.target == 'undefined'){
+		res.send('"err":"target not defined! Please see API docs!"');
+	}else{
+		switch(req.query.target){
+			case 'blog': 
+				if(typeof req.query.post_title == 'undefined'){
+					res.send('"err":"post_title not defined! Please see API docs!"');
+				}else{
+					var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+					console.log("Connecting to the database...");
+					client.connect((err)=>{
+						console.log("Connection success, querying in progress...");
+						var query = client.query(`SELECT * FROM blog WHERE title='${req.query.post_title}';`);
+						query.on('row',(row)=>{
+							postData = row;
+							console.log(postData);
+						});
+						query.on('end',()=>{ // Once the query is complete, the client will close
+							client.end();
+							console.log("Query complete, Connection terminated.");
+							if(typeof postData == 'undefined'){
+								res.send('{"err":"Post does not exist!"}');
+							}else{
+								res.send(JSON.stringify(postData));
+							}
+						});
+					});
+				}
+				break;
+			default:
+				res.send('{"err":"Unknown target! Please see API docs!"');
+				break;
+		}
+	}
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
