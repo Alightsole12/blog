@@ -178,6 +178,7 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
+	// BUG: Two queries appear to be running after seding data
 	console.log(req.query.id);
 	var postData;
 	const queryString = `SELECT * FROM blog WHERE title='${req.query.id}';`;
@@ -201,15 +202,17 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 		});
 	});
 });
-App.post('/blog/edit_post?*',(req,res)=>{
+App.post('/blog/edit_post?*',(req,res)=>{ // This code block handles the data from the one above
+	// Issue: Database is being called twice after exectuing this code block
+	console.log("This should always happen if all is well");
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(`
 			UPDATE blog
-			SET title='',body=''
-			WHERE title='';
+			SET title='${req.body.post_title}',body='${req.body.post_body}'
+			WHERE title='${req.query.old_title}';
 		`);
 		query.on('row',(row)=>{
 			postData = row;
@@ -218,11 +221,7 @@ App.post('/blog/edit_post?*',(req,res)=>{
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			if(typeof postData == 'undefined'){
-				res.redirect('/blog/edit');
-			}else{
-				res.render('edit_post',{"postData":postData});
-			}
+			if(typeof postData == 'undefined') res.redirect('/blog/edit');
 		});
 	});
 	res.redirect('/blog/edit');
@@ -230,6 +229,7 @@ App.post('/blog/edit_post?*',(req,res)=>{
 
 // API
 App.get('/api',(req,res)=>{
+	console.log("API call in progress...");
 	console.log(req.query.post_title);
 	if(typeof req.query.target == 'undefined'){
 		res.send('"err":"target not defined! Please see API docs!"');
@@ -265,6 +265,7 @@ App.get('/api',(req,res)=>{
 				break;
 		}
 	}
+	console.log("API call complete");
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
