@@ -232,12 +232,12 @@ App.get('/api',(req,res)=>{
 	console.log("API call in progress...");
 	console.log(req.query.post_title);
 	if(typeof req.query.target == 'undefined'){
-		res.send('"err":"target not defined! Please see API docs!"');
+		res.send('{"err":"target not defined! Please see API docs!"}');
 	}else{
 		switch(req.query.target){
 			case 'blog': 
 				if(typeof req.query.post_title == 'undefined'){
-					res.send('"err":"post_title not defined! Please see API docs!"');
+					res.send('{"err":"post_title not defined! Please see API docs!"}');
 				}else{
 					var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 					console.log("Connecting to the database...");
@@ -261,7 +261,7 @@ App.get('/api',(req,res)=>{
 				}
 				break;
 			default:
-				res.send('{"err":"Unknown target! Please see API docs!"');
+				res.send('{"err":"Unknown target! Please see API docs!"}');
 				break;
 		}
 	}
