@@ -6,7 +6,6 @@ const http = require('http'),
 	bodyParser = require('body-parser'),
 	helmet = require('helmet'),
 	ejs = require('ejs'),
-	multer = require('multer'),
 	pg = require('pg');
 
 // SET ENV VARIABLES
@@ -17,16 +16,6 @@ if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
 
-//client.connect(); // Connecting to the database
-//const query = client.query( // Making the query // Title, txt link on server, date posted, 
-	//`CREATE TABLE blog(
-		//title varchar(255),
-		//date date,
-		//link varchar(255)
-	//);`
-//);
-//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
-
 // App Setup
 const App = express();
 App.set('views','./views');
@@ -34,7 +23,6 @@ App.use(express.static('public'));
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
 App.use(helmet());
-App.use(multer({dest:'./uploads'}).any()); // We may need to change this in the future
 App.set('view engine','ejs');
 
 // Routing
@@ -178,7 +166,7 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
-	// BUG: Two queries appear to be running after seding data
+	// Improvement: Possibly get rid of the db communications here by just sending the req.query.id as the title for the title tag rather than hitting the db for all the data that would go unused
 	console.log(req.query.id);
 	var postData;
 	const queryString = `SELECT * FROM blog WHERE title='${req.query.id}';`;
@@ -202,8 +190,8 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 		});
 	});
 });
-App.post('/blog/edit_post?*',(req,res)=>{ // This code block handles the data from the one above
-	// Issue: Database is being called twice after exectuing this code block
+App.post('/blog/edit_post?*',(req,res)=>{ 
+	// This code block handles the data from the one above
 	console.log("This should always happen if all is well");
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
