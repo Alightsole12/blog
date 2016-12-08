@@ -26,13 +26,14 @@ App.use(helmet());
 App.set('view engine','ejs');
 
 // Routing
-// The homepage of the site
+// The landing page
 App.get('/',(req,res)=>{
 	res.send("Hello world! <a href='/blog'>Blog</a>");
 });
 
 // The main blog page
 App.get('/blog',(req,res)=>{
+	// Some yucky half-baked json setup I did before I used pg
 	fs.readFile("data/recent.json","utf-8",(err,data)=>{
 		const recent = JSON.parse(data).recent;
 		console.log(`URL Query: ${req.query.page}`);
@@ -48,18 +49,39 @@ App.get('/blog',(req,res)=>{
 
 // A specific blog post
 App.get('/blog/post/*',(req,res)=>{
+	// // Same as above :(
+	// const urlData = req.url.split("/");
+	// const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
+	// const renderPost = ()=>{
+	// 	fs.readFile(postLink,"utf-8",(err,data)=>{
+	// 		res.render("post",JSON.parse(data));
+	// 	});
+	// };
+	// fs.stat(postLink,(err,stat)=>{
+	// 	if(err == null)
+	// 		renderPost();
+	// 	else
+	// 		res.redirect("/404");
+	// });
+	// Grab the title from the url and then use it to grab db data and send it to ejs, else redirect
+	var data = {};
 	const urlData = req.url.split("/");
-	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
-	const renderPost = ()=>{
-		fs.readFile(postLink,"utf-8",(err,data)=>{
+	console.log(urlData);
+	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(
+			`SELECT * FROM blog WHERE title='${urlData[3]}';`
+		);
+		query.on('row',(row)=>{
+			data.push(ro)
+		});
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
 			res.render("post",JSON.parse(data));
 		});
-	};
-	fs.stat(postLink,(err,stat)=>{
-		if(err == null)
-			renderPost();
-		else
-			res.redirect("/404");
 	});
 });
 
@@ -166,7 +188,6 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
-	// Improvement: Possibly get rid of the db communications here by just sending the req.query.id as the title for the title tag rather than hitting the db for all the data that would go unused
 	console.log(req.query.id);
 	var postData;
 	const queryString = `SELECT * FROM blog WHERE title='${req.query.id}';`;
