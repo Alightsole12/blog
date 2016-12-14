@@ -1,5 +1,6 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 // TODO: Implement backtick escaping
+// BUG: Trying to find lorem Ipsum test is broken? maybe spaces in url query break it?
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -164,30 +165,29 @@ App.post('/blog/edit',(req,res)=>{
 	invalidRequest = false;	
 	switch(req.body.submit){
 		case 'Edit':
-			invalidRequest = true;
 			res.redirect('/blog/edit_post?id='+req.body.post_name);
 			break;
+		case 'View':
+			res.redirect('/blog/post/'+req.body.post_name);
+			break;
 		case 'Remove':
-			const queryString = "DELETE FROM blog WHERE title='"+req.body.post_name+"';";
+			var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+			console.log("Connecting to the database...");
+			client.connect((err)=>{
+				console.log("Connection success, querying in progress...");
+				var query = client.query("DELETE FROM blog WHERE title='"+req.body.post_name+"';");
+				query.on('end',()=>{ // Once the query is complete, the client will close
+					client.end();
+					console.log("Query complete, Connection terminated.");
+					res.redirect('/blog/edit');
+				});
+			});
 			break;
 		default:
 			console.log("Error: Invalid Request");
 			invalidRequest = true;
 			res.redirect('/blog/edit');
 			break;
-	}
-	if(!invalidRequest){ // Note: This'll probably be removed after we finish the other requests
-		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
-		console.log("Connecting to the database...");
-		client.connect((err)=>{
-			console.log("Connection success, querying in progress...");
-			var query = client.query(queryString);
-			query.on('end',()=>{ // Once the query is complete, the client will close
-				client.end();
-				console.log("Query complete, Connection terminated.");
-				res.redirect('/blog/edit');
-			});
-		});
 	}
 });
 
@@ -217,7 +217,6 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 });
 App.post('/blog/edit_post?*',(req,res)=>{ 
 	// This code block handles the data from the one above
-	console.log("This should always happen if all is well");
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	req.body.post_title.replace("\'","&apos;").replace("\"","&quot;");
