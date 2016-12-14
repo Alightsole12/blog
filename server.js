@@ -1,4 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
+// TODO: Implement backtick escaping
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -64,10 +65,11 @@ App.get('/blog/post/*',(req,res)=>{
 	// 		res.redirect("/404");
 	// });
 	// Grab the title from the url and then use it to grab db data and send it to ejs, else redirect
-	var data = {};
+	var data;
 	const urlData = req.url.split("/");
-	console.log(urlData);
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log(urlData);
+	urlData[3] = urlData[3].replace("\'","&apos;").replace("\"","&quot;");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
@@ -75,10 +77,12 @@ App.get('/blog/post/*',(req,res)=>{
 			`SELECT * FROM blog WHERE title='${urlData[3]}';`
 		);
 		query.on('row',(row)=>{
-			data.push(ro)
+			console.log("Row recieved.")
+			data = JSON.stringify(row).replace("&quot;","\"").replace("&apos;","\'");
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
+			console.log(data);
 			console.log("Query complete, Connection terminated.");
 			res.render("post",JSON.parse(data));
 		});
@@ -104,8 +108,8 @@ App.post('/blog/new',(req,res)=>{
 	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	var postTitle = req.body.post_title.replace("\'","&apos;").replace("\"","&quot");
-	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot");
+	var postTitle = req.body.post_title.replace("\'","&apos;").replace("\"","&quot;");
+	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot;");
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
 		console.log("Data Sanitization Complete.");
 		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -142,8 +146,8 @@ App.get('/blog/edit',(req,res)=>{
 				`SELECT * FROM blog`
 			);
 			query.on('row',(row)=>{
-				row.title = row.title.replace("&apos;","\'").replace("&quot","\"");
-				row.body = row.body.replace("&apos;","\'").replace("&quot","\"");
+				row.title = row.title.replace("&apos;","\'").replace("&quot;","\"");
+				row.body = row.body.replace("&apos;","\'").replace("&quot;","\"");
 				postsArray.push(row);
 			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
@@ -216,6 +220,8 @@ App.post('/blog/edit_post?*',(req,res)=>{
 	console.log("This should always happen if all is well");
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
+	req.body.post_title.replace("\'","&apos;").replace("\"","&quot;");
+	req.body.post_body.replace("\'","&apos;").replace("\"","&quot;");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(`
