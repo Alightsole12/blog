@@ -1,6 +1,8 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 // TODO: Implement backtick escaping
 // BUG: Trying to find lorem Ipsum test is broken? maybe spaces in url query break it?
+// BUG: Non-existant articles break the server
+// TODO: Escape strings in /api
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -70,16 +72,15 @@ App.get('/blog/post/*',(req,res)=>{
 	const urlData = req.url.split("/");
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log(urlData);
-	urlData[3] = urlData[3].replace("\'","&apos;").replace("\"","&quot;");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(
-			`SELECT * FROM blog WHERE title='${urlData[3]}';`
+			`SELECT * FROM blog WHERE title='${urlData[3].replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}';`
 		);
 		query.on('row',(row)=>{
 			console.log("Row recieved.")
-			data = JSON.stringify(row).replace("&quot;","\"").replace("&apos;","\'");
+			data = JSON.stringify(row).replace("&apos;",/\'/g).replace("&quot;",/\"/g).replace("&#96;",/\`/g);
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
@@ -109,8 +110,8 @@ App.post('/blog/new',(req,res)=>{
 	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	var postTitle = req.body.post_title.replace("\'","&apos;").replace("\"","&quot;");
-	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot;");
+	var postTitle = req.body.post_title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
+	var postBody = req.body.post_body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
 		console.log("Data Sanitization Complete.");
 		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -147,8 +148,8 @@ App.get('/blog/edit',(req,res)=>{
 				`SELECT * FROM blog`
 			);
 			query.on('row',(row)=>{
-				row.title = row.title.replace("&apos;","\'").replace("&quot;","\"");
-				row.body = row.body.replace("&apos;","\'").replace("&quot;","\"");
+				row.title = row.title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
+				row.body = row.body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
 				postsArray.push(row);
 			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
@@ -215,17 +216,15 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 		});
 	});
 });
-App.post('/blog/edit_post?*',(req,res)=>{ 
+App.post('/blog/edit_post?*',(req,res)=>{
 	// This code block handles the data from the one above
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
-	req.body.post_title.replace("\'","&apos;").replace("\"","&quot;");
-	req.body.post_body.replace("\'","&apos;").replace("\"","&quot;");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(`
 			UPDATE blog
-			SET title='${req.body.post_title}',body='${req.body.post_body}'
+			SET title='${req.body.post_title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}',body='${req.body.post_body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}'
 			WHERE title='${req.query.old_title}';
 		`);
 		query.on('row',(row)=>{
