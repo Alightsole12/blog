@@ -2,7 +2,7 @@
 // TODO: Implement backtick escaping
 // BUG: Trying to find lorem Ipsum test is broken? maybe spaces in url query break it?
 // BUG: Non-existant articles break the server
-// TODO: Escape strings in /api
+// TODO: When editing a post make node replace html safe characters with their actual ascii varients
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -259,7 +259,7 @@ App.get('/api',(req,res)=>{
 						var query = client.query(`SELECT * FROM blog WHERE title='${req.query.post_title}';`);
 						query.on('row',(row)=>{
 							postData = row;
-							console.log(postData);
+							console.log(row);
 						});
 						query.on('end',()=>{ // Once the query is complete, the client will close
 							client.end();

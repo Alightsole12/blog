@@ -15,7 +15,8 @@ BlogApp.controller('EditController',($scope,$http)=>{
 		method:'GET',
 		url:'/api?target=blog&post_title='+apiUrl
 	}).then((res)=>{
-		$scope.data = res;
+		// Uh oh this broke it
+		$scope.data = res;//.replace("&apos;",/\'/g);//.replace("&quot;",/\"/g).replace("&#96;",/\`/g);
 	},(err)=>{
 		alert(err);
 	});
