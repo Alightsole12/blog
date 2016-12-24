@@ -79,7 +79,7 @@ App.get('/blog/post/*',(req,res)=>{
 			`SELECT * FROM blog WHERE title='${urlData[3].replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}';`
 		);
 		query.on('row',(row)=>{
-			console.log("Row recieved.")
+			console.log("Row recieved.");
 			data = JSON.stringify(row).replace("&apos;",/\'/g).replace("&quot;",/\"/g).replace("&#96;",/\`/g);
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
@@ -242,6 +242,7 @@ App.post('/blog/edit_post?*',(req,res)=>{
 
 // API
 App.get('/api',(req,res)=>{
+	var postData;
 	console.log("API call in progress...");
 	console.log(req.query.post_title);
 	if(typeof req.query.target == 'undefined'){
@@ -267,6 +268,7 @@ App.get('/api',(req,res)=>{
 							if(typeof postData == 'undefined'){
 								res.send('{"err":"Post does not exist!"}');
 							}else{
+								// Solution: Decode the html-safe characters on the client-side
 								res.send(JSON.stringify(postData));
 							}
 						});

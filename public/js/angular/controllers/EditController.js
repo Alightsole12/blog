@@ -1,3 +1,5 @@
+let BlogApp = angular.module('BlogApp',[]);
+
 BlogApp.controller('EditController',($scope,$http)=>{
 	function getQueryVariable(variable){
 		var query = window.location.search.substring(1);
@@ -15,8 +17,9 @@ BlogApp.controller('EditController',($scope,$http)=>{
 		method:'GET',
 		url:'/api?target=blog&post_title='+apiUrl
 	}).then((res)=>{
-		// Uh oh this broke it
-		$scope.data = res;//.replace("&apos;",/\'/g);//.replace("&quot;",/\"/g).replace("&#96;",/\`/g);
+		res.data.title = res.data.title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
+		res.data.body = res.data.body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
+		$scope.data = res;
 	},(err)=>{
 		alert(err);
 	});
