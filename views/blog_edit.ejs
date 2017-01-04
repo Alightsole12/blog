@@ -1,11 +1,11 @@
 <!doctype html>
-<html>
+<html ng-app="BlogApp">
 	<head>
 		<link rel="stylesheet" type="text/css" href="/css/styles.css"/>
 		<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js'></script>
 		<script type="text/javascript" src='/js/scripts.js'></script>
 	</head>
-	<body ng-app='BlogApp'>
+	<body ng-controller="EditViewController">
 		<h1>Edit a Post</h1>
 		<hr/><!-- POSTS CANNOT BE NAMED THE SAME THING -->
 		<% for(var i = 0; i < postsArray.length; i++){ %>
@@ -13,8 +13,8 @@
 				<input style='visibility:hidden;' name="post_name" value="<%= postsArray[i].title %>"/>
 				<div>
 					<div class='edit_preview'>
-						<h2 class='edit_title'><%= postsArray[i].title %></h2>
-						<p class='edit_body'><%= postsArray[i].body %></p>
+						<h2 class='edit_title'><%= postsArray[i].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
+						<p class='edit_body'><%= postsArray[i].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'") %></p>
 						<p><span class='edit_date'>Date Posted: <%= postsArray[i].date %></span></p>
 					</div>
 					<div class='edit_wrapper'>

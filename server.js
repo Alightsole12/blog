@@ -1,8 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
-// TODO: Implement backtick escaping
-// BUG: Trying to find lorem Ipsum test is broken? maybe spaces in url query break it?
-// BUG: Non-existant articles break the server
-// TODO: When editing a post make node replace html safe characters with their actual ascii varients
+// TODO: Change all url-safe characters into their ascii counterparts
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -69,24 +66,28 @@ App.get('/blog/post/*',(req,res)=>{
 	// });
 	// Grab the title from the url and then use it to grab db data and send it to ejs, else redirect
 	var data;
-	const urlData = req.url.split("/");
+	const urlData = req.url.split("/"); // Picking apart the URL data to see which post is being requested
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log(urlData);
+	//urlData[3] = urlData[3].replace(/%20/g," ");
+	urlData[3] = decodeURI(urlData[3]);
+	console.log(urlData[3]+"->"+urlData[3].replace(/%20/g," "));
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(
 			`SELECT * FROM blog WHERE title='${urlData[3].replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}';`
-		);
+		); // Checking if it exists in the database, converting ascii to html safe characters like in the records
 		query.on('row',(row)=>{
 			console.log("Row recieved.");
-			data = JSON.stringify(row).replace("&apos;",/\'/g).replace("&quot;",/\"/g).replace("&#96;",/\`/g);
+			data = JSON.stringify(row);
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log(data);
 			console.log("Query complete, Connection terminated.");
-			res.render("post",JSON.parse(data));
+			if(data == null) res.redirect("/404");
+			else res.render("post",JSON.parse(data)); // Sending data to the view
 		});
 	});
 });
@@ -222,19 +223,16 @@ App.post('/blog/edit_post?*',(req,res)=>{
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
+		// Updating the title and body to the data sent
 		var query = client.query(`
 			UPDATE blog
 			SET title='${req.body.post_title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}',body='${req.body.post_body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}'
 			WHERE title='${req.query.old_title}';
 		`);
-		query.on('row',(row)=>{
-			postData = row;
-			console.log(postData);
-		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			if(typeof postData == 'undefined') res.redirect('/blog/edit');
+			console.log(typeof postData == 'undefined');
 		});
 	});
 	res.redirect('/blog/edit');
