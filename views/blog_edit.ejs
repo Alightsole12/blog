@@ -15,12 +15,12 @@
 					<div class='edit_preview'>
 						<h2 class='edit_title'><%= postsArray[i].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
 						<p class='edit_body'><%= postsArray[i].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'") %></p>
-						<p><span class='edit_date'>Date Posted: <%= postsArray[i].date %></span></p>
+						<p><span class='edit_date'>Posted: <%= `${postsArray[i].date.toString().split(" ")[1]} ${postsArray[i].date.toString().split(" ")[2]}, ${postsArray[i].date.toString().split(" ")[3]}` %></span></p>
 					</div>
 					<div class='edit_wrapper'>
 						<ul class='edit_gui'>
 							<li><input id='edit' type="submit" name="submit" value='Edit'></li>
-							<li><input id='view' type='submit' name='submit' value='View'></li>
+							<li><input id='view' type='submit' name='submi ${postsArray[i].date.toString().split(" ")[2]} ${postsArray[i].date.toString().split(" ")[3]}t' value='View'></li>
 							<li><input id='stats' type='submit' name='submit' value='Stats'></li>
 							<li><input id='private' type='submit' name='submit' value='Private'></li>
 							<li><input id='remove' type='submit' name='submit' value='Remove'></li>

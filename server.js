@@ -154,7 +154,8 @@ App.post('/blog/edit',(req,res)=>{
 	console.log("Submitted data",req.body.submit, req.body.post_name);
 	invalidRequest = false;	
 	switch(req.body.submit){
-		case 'Edit':
+		case 'Edit': // First, make html safe stuff into actual ascii, then, make ascii into url safe stuff, then send it to the edit_post route. From there, decode the url and then make the ascii back into html safe stuff and compare it against the database. Perhaps make methods for all the .replace stuff to make things easier to manage as well
+			console.log("Handler: "+ req.body.post_name);
 			res.redirect('/blog/edit_post?id='+req.body.post_name);
 			break;
 		case 'View':
@@ -182,9 +183,9 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
-	console.log(req.query.id);
+	console.log("req.query.id: ",req.query.id);
 	var postData;
-	const queryString = `SELECT * FROM blog WHERE title='${req.query.id}';`;
+	const queryString = `SELECT * FROM blog WHERE title='${req.query.id.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}';`;
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
@@ -198,6 +199,7 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 			client.end();
 			console.log("Query complete, Connection terminated.");
 			if(typeof postData == 'undefined'){
+				console.log("Database has no records for such post!");
 				res.redirect('/blog/edit');
 			}else{
 				res.render('edit_post',{"postData":postData});
