@@ -1,5 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
-// TODO: Change all url-safe characters into their ascii counterparts
+// TODO: Change all url-safe characters into their ASCII counterparts
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -50,20 +50,6 @@ App.get('/blog',(req,res)=>{
 
 // A specific blog post
 App.get('/blog/post/*',(req,res)=>{
-	// // Same as above :(
-	// const urlData = req.url.split("/");
-	// const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
-	// const renderPost = ()=>{
-	// 	fs.readFile(postLink,"utf-8",(err,data)=>{
-	// 		res.render("post",JSON.parse(data));
-	// 	});
-	// };
-	// fs.stat(postLink,(err,stat)=>{
-	// 	if(err == null)
-	// 		renderPost();
-	// 	else
-	// 		res.redirect("/404");
-	// });
 	// Grab the title from the url and then use it to grab db data and send it to ejs, else redirect
 	var data;
 	const urlData = req.url.split("/"); // Picking apart the URL data to see which post is being requested
@@ -105,6 +91,7 @@ App.get('/signin',(req,res)=>{
 
 App.get('/blog/new',(req,res)=>{
 	res.render("blog_new",{});
+	// Implement below later for security
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
@@ -160,6 +147,7 @@ App.get('/blog/edit',(req,res)=>{
 			});
 		});
 	//else
+		// Implement below for security
 		//res.redirect('/signin?target=blog/edit');
 });
 App.post('/blog/edit',(req,res)=>{
@@ -218,7 +206,6 @@ App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data th
 	});
 });
 App.post('/blog/edit_post?*',(req,res)=>{
-	// This code block handles the data from the one above
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
