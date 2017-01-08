@@ -13,6 +13,14 @@ const http = require('http'),
 const ip = '192.168.2.9';
 var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
+function ascii2html(ascii){
+	// Returns html-safe code from ascii
+	return ascii.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
+}
+function html2ascii(html){
+	// Returns ascii from html-safe code
+	return html.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
+}
 if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
@@ -55,14 +63,13 @@ App.get('/blog/post/*',(req,res)=>{
 	const urlData = req.url.split("/"); // Picking apart the URL data to see which post is being requested
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log(urlData);
-	//urlData[3] = urlData[3].replace(/%20/g," ");
 	urlData[3] = decodeURI(urlData[3]);
 	console.log(urlData[3]+"->"+urlData[3].replace(/%20/g," "));
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(
-			`SELECT * FROM blog WHERE title='${urlData[3].replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}';`
+			`SELECT * FROM blog WHERE title='${ascii2html(urlData[3])}';`
 		); // Checking if it exists in the database, converting ascii to html safe characters like in the records
 		query.on('row',(row)=>{
 			console.log("Row recieved.");
@@ -98,8 +105,8 @@ App.post('/blog/new',(req,res)=>{
 	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	var postTitle = req.body.post_title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
-	var postBody = req.body.post_body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
+	var postTitle = ascii2html(req.body.post_title);
+	var postBody = ascii2html(req.body.post_body);
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
 		console.log("Data Sanitization Complete.");
 		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -136,8 +143,8 @@ App.get('/blog/edit',(req,res)=>{
 				`SELECT * FROM blog`
 			);
 			query.on('row',(row)=>{
-				row.title = row.title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
-				row.body = row.body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
+				row.title = ascii2html(row.title);
+				row.body = ascii2html(row.body);
 				postsArray.push(row);
 			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
@@ -154,7 +161,7 @@ App.post('/blog/edit',(req,res)=>{
 	console.log("Submitted data",req.body.submit, req.body.post_name);
 	invalidRequest = false;	
 	switch(req.body.submit){
-		case 'Edit': // First, make html safe stuff into actual ascii, then, make ascii into url safe stuff, then send it to the edit_post route. From there, decode the url and then make the ascii back into html safe stuff and compare it against the database. Perhaps make methods for all the .replace stuff to make things easier to manage as well
+		case 'Edit': // First, make html safe stuff into actual ascii, then, make ascii into url safe stuff, then send it to the edit_post route. From there, decode the url and then make the ascii back into html safe stuff and compare it against the database.
 			console.log("Handler: "+ req.body.post_name);
 			res.redirect('/blog/edit_post?id='+req.body.post_name);
 			break;
@@ -185,7 +192,7 @@ App.post('/blog/edit',(req,res)=>{
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
 	console.log("req.query.id: ",req.query.id);
 	var postData;
-	const queryString = `SELECT * FROM blog WHERE title='${req.query.id.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}';`;
+	const queryString = `SELECT * FROM blog WHERE title='${ascii2html(req.query.id)}';`;
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
@@ -215,7 +222,7 @@ App.post('/blog/edit_post?*',(req,res)=>{
 		// Updating the title and body to the data sent
 		var query = client.query(`
 			UPDATE blog
-			SET title='${req.body.post_title.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}',body='${req.body.post_body.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;")}'
+			SET title='${ascii2html(req.body.post_title)}',body='${ascii2html(req.body.post_body)}'
 			WHERE title='${req.query.old_title}';
 		`);
 		query.on('end',()=>{ // Once the query is complete, the client will close
