@@ -30,6 +30,14 @@ function html2ascii(html){
 	// Returns ascii from html-safe code
 	return html.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
 }
+function convertLinkFormat(str){
+	var alteredStr = str.toLowerCase();
+	var allowedCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','-','_'];
+	// Do something with this ^ later
+	alteredStr = alteredStr.replace(/"/g,"").replace(/'/g,"").replace(/`/g,"").replace(/ /g,"-");
+	console.log(`${str}->${alteredStr}`);
+}
+convertLinkFormat("'teSt link'");
 if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
@@ -47,6 +55,23 @@ App.set('view engine','ejs');
 // The landing page
 App.get('/',(req,res)=>{
 	res.send("Hello world! <a href='/blog'>Blog</a>");
+});
+
+App.get('/db',(req,res)=>{
+	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(
+			`ALTER TABLE blog
+			ADD post_link VARCHAR(255);`
+		);
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+			res.send("Database Altered");
+		});
+	});
 });
 
 // The main blog page
