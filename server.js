@@ -75,9 +75,13 @@ App.get('/db',(req,res)=>{
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(
-			`ALTER TABLE blog
-			ADD post_link VARCHAR(255);`
+			//`ALTER TABLE blog
+			//ADD post_link VARCHAR(255);`
+			`SELECT * FROM blog;`
 		);
+		query.on('row',(row)=>{
+			console.log(JSON.parse(row).toString());
+		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
@@ -153,6 +157,7 @@ App.post('/blog/new',(req,res)=>{
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
 	var postTitle = ascii2html(req.body.post_title);
 	var postBody = ascii2html(req.body.post_body);
+	var postLink = convertLinkFormat(postTitle);
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
 		console.log("Data Sanitization Complete.");
 		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -160,8 +165,8 @@ App.post('/blog/new',(req,res)=>{
 		client.connect((err)=>{
 			console.log("Connection success, querying in progress...");
 			var query = client.query(
-				`INSERT INTO blog(title,date,body)
-				VALUES('${postTitle}','${currentDate}','${postBody}');`
+				`INSERT INTO blog(title,date,body,post_link)
+				VALUES('${postTitle}','${currentDate}','${postBody}','${postLink}');`
 			);
 			query.on('end',()=>{ // Once the query is complete, the client will close
 				client.end();
