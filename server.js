@@ -31,13 +31,25 @@ function html2ascii(html){
 	return html.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
 }
 function convertLinkFormat(str){
-	var alteredStr = str.toLowerCase();
+	var validCharacter;
+	var tempStr = str.toLowerCase().split("");
 	var allowedCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','-','_'];
-	// Do something with this ^ later
-	alteredStr = alteredStr.replace(/"/g,"").replace(/'/g,"").replace(/`/g,"").replace(/ /g,"-");
-	console.log(`${str}->${alteredStr}`);
+	for(var i = 0; i <= tempStr.length; i++){
+		// For every character in the string
+		validCharacter = false;
+		for(var j = 0; j <= allowedCharacters.length; j++){
+			// Comparing it against every character in the allowedCharacters array
+			if(tempStr[i] == allowedCharacters[j]) validCharacter = true;
+		}
+		if(!validCharacter) tempStr[i] = "";
+	}
+	var alteredStr = "";
+	for(var i = 0; i <= tempStr.length; i++){
+		if(tempStr[i] != null) alteredStr += tempStr[i];
+	}
+	return alteredStr;
 }
-convertLinkFormat("'teSt link'");
+convertLinkFormat("va@%^&l#i@d");
 if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
