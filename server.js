@@ -9,6 +9,7 @@
 6. Alter the post_edit GET requests to accept the link data in place of the post data as well
 7. Allow posts to be viewed via this link rather than the title in URL format
 */
+// BUG: http://localhost:8000/blog/edit_post?post_link=this-is-a-post crashes the server
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -39,6 +40,7 @@ function convertLinkFormat(str){
 		validCharacter = false;
 		for(var j = 0; j <= allowedCharacters.length; j++){
 			// Comparing it against every character in the allowedCharacters array
+			if(tempStr[i] == " ") tempStr[i] = "-";
 			if(tempStr[i] == allowedCharacters[j]) validCharacter = true;
 		}
 		if(!validCharacter) tempStr[i] = "";
@@ -49,7 +51,6 @@ function convertLinkFormat(str){
 	}
 	return alteredStr;
 }
-convertLinkFormat("va@%^&l#i@d");
 if(typeof debug == 'string')
 	debug = false;
 const finish = typeof debug;
@@ -80,7 +81,8 @@ App.get('/db',(req,res)=>{
 			`SELECT * FROM blog;`
 		);
 		query.on('row',(row)=>{
-			console.log(JSON.parse(row).toString());
+			console.log("finna crash")
+			console.log(JSON.stringify(row));
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
@@ -289,20 +291,20 @@ App.post('/blog/edit_post?*',(req,res)=>{
 App.get('/api',(req,res)=>{
 	var postData;
 	console.log("API call in progress...");
-	console.log(req.query.post_title);
+	console.log(req.query.post_link);
 	if(typeof req.query.target == 'undefined'){
 		res.send('{"err":"target not defined! Please see API docs!"}');
 	}else{
 		switch(req.query.target){
 			case 'blog': 
-				if(typeof req.query.post_title == 'undefined'){
-					res.send('{"err":"post_title not defined! Please see API docs!"}');
+				if(typeof req.query.post_link == 'undefined'){
+					res.send('{"err":"post_link not defined! Please see API docs!"}');
 				}else{
 					var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 					console.log("Connecting to the database...");
 					client.connect((err)=>{
 						console.log("Connection success, querying in progress...");
-						var query = client.query(`SELECT * FROM blog WHERE title='${req.query.post_title}';`);
+						var query = client.query(`SELECT * FROM blog WHERE post_link='${req.query.post_link}';`);
 						query.on('row',(row)=>{
 							postData = row;
 							console.log(row);
