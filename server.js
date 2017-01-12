@@ -114,13 +114,11 @@ App.get('/blog/post/*',(req,res)=>{
 	const urlData = req.url.split("/"); // Picking apart the URL data to see which post is being requested
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log(urlData);
-	urlData[3] = decodeURI(urlData[3]);
-	console.log(urlData[3]+"->"+urlData[3].replace(/%20/g," "));
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(
-			`SELECT * FROM blog WHERE title='${ascii2html(urlData[3])}';`
+			`SELECT * FROM blog WHERE post_link='${urlData[3]}';`
 		); // Checking if it exists in the database, converting ascii to html safe characters like in the records
 		query.on('row',(row)=>{
 			console.log("Row recieved.");
