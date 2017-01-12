@@ -1,14 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
-// TODO: Change all url-safe characters into their ASCII counterparts
-/* TODO:
-1. Add another column to database for link data
-2. Make a function for generating this
-3. Generate one upon making a new entry
-4. Use it rather than the post_title in the API
-5. It should remove all ',",`, replace spaces with -, etc
-6. Alter the post_edit GET requests to accept the link data in place of the post data as well
-7. Allow posts to be viewed via this link rather than the title in URL format
-*/
+// TODO: Get the view button working with the new links
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
