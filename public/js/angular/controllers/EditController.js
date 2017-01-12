@@ -12,10 +12,10 @@ BlogApp.controller('EditController',($scope,$http)=>{
 		}
 		return(false);
 	}
-	let apiUrl = getQueryVariable('id');
+	let apiUrl = getQueryVariable('post_link');
 	$http({
 		method:'GET',
-		url:'/api?target=blog&post_title='+apiUrl
+		url:'/api?target=blog&post_link='+apiUrl
 	}).then((res)=>{
 		res.data.title = res.data.title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
 		res.data.body = res.data.body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
