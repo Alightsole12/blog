@@ -9,7 +9,6 @@
 6. Alter the post_edit GET requests to accept the link data in place of the post data as well
 7. Allow posts to be viewed via this link rather than the title in URL format
 */
-// BUG: http://localhost:8000/blog/edit_post?post_link=this-is-a-post crashes the server
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -243,29 +242,33 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
-	console.log("req.query.post_link: ",req.query.post_link);
-	var postData;
-	const queryString = `SELECT * FROM blog WHERE post_link='${req.query.post_link}';`;
-	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
-	console.log("Connecting to the database...");
-	client.connect((err)=>{
-		console.log("Connection success, querying in progress...");
-		var query = client.query(queryString);
-		query.on('row',(row)=>{
-			postData = row;
-			console.log(postData);
+	if(req.query.post_link != null){ // Ensuring the query variable exists in the request
+		console.log("req.query.post_link: ",req.query.post_link);
+		var postData;
+		const queryString = `SELECT * FROM blog WHERE post_link='${req.query.post_link}';`;
+		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(queryString);
+			query.on('row',(row)=>{
+				postData = row;
+				console.log(postData);
+			});
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+				if(typeof postData == 'undefined'){
+					console.log("Database has no records for such post!");
+					res.redirect('/blog/edit');
+				}else{
+					res.render('edit_post',{"postData":postData});
+				}
+			});
 		});
-		query.on('end',()=>{ // Once the query is complete, the client will close
-			client.end();
-			console.log("Query complete, Connection terminated.");
-			if(typeof postData == 'undefined'){
-				console.log("Database has no records for such post!");
-				res.redirect('/blog/edit');
-			}else{
-				res.render('edit_post',{"postData":postData});
-			}
-		});
-	});
+	}else{
+		res.redirect('/blog/edit');
+	}
 });
 App.post('/blog/edit_post?*',(req,res)=>{
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
