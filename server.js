@@ -243,9 +243,9 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
-	console.log("req.query.id: ",req.query.id);
+	console.log("req.query.post_link: ",req.query.post_link);
 	var postData;
-	const queryString = `SELECT * FROM blog WHERE title='${ascii2html(req.query.id)}';`;
+	const queryString = `SELECT * FROM blog WHERE post_link='${req.query.post_link}';`;
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
