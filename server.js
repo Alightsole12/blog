@@ -23,6 +23,7 @@ function html2ascii(html){
 	return html.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
 }
 function convertLinkFormat(str){
+	str = html2ascii(str);
 	var validCharacter;
 	var tempStr = str.toLowerCase().split("");
 	var allowedCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','-','_'];
@@ -62,6 +63,8 @@ App.get('/',(req,res)=>{
 });
 
 App.get('/db',(req,res)=>{
+	var postTitles = [];
+	var postLinks = [];
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
@@ -72,12 +75,20 @@ App.get('/db',(req,res)=>{
 			`SELECT * FROM blog;`
 		);
 		query.on('row',(row)=>{
-			console.log("finna crash")
-			console.log(JSON.stringify(row));
+			postTitles.push(row.title);
+			postLinks.push(convertLinkFormat(row.title));
+			console.log(JSON.stringify(row.title));
+			console.log(convertLinkFormat(row.title));
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
+			var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+			client.connect((err)=>{
+				var query = client.query(`
+
+				`);
+			});
 			res.send("Database Altered");
 		});
 	});
