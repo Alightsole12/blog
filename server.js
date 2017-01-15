@@ -62,38 +62,6 @@ App.get('/',(req,res)=>{
 	res.send("Hello world! <a href='/blog'>Blog</a>");
 });
 
-App.get('/db',(req,res)=>{
-	var postTitles = [];
-	var postLinks = [];
-	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
-	console.log("Connecting to the database...");
-	client.connect((err)=>{
-		console.log("Connection success, querying in progress...");
-		var query = client.query(
-			//`ALTER TABLE blog
-			//ADD post_link VARCHAR(255);`
-			`SELECT * FROM blog;`
-		);
-		query.on('row',(row)=>{
-			postTitles.push(row.title);
-			postLinks.push(convertLinkFormat(row.title));
-			console.log(JSON.stringify(row.title));
-			console.log(convertLinkFormat(row.title));
-		});
-		query.on('end',()=>{ // Once the query is complete, the client will close
-			client.end();
-			console.log("Query complete, Connection terminated.");
-			var client = new pg.Client(process.env.databaseLink+"?ssl=true");
-			client.connect((err)=>{
-				var query = client.query(`
-
-				`);
-			});
-			res.send("Database Altered");
-		});
-	});
-});
-
 // The main blog page
 App.get('/blog',(req,res)=>{
 	// Some yucky half-baked json setup I did before I used pg
