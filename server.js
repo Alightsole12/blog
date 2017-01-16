@@ -11,7 +11,7 @@ const http = require('http'),
 	pg = require('pg');
 
 // SET ENV VARIABLES
-const ip = '192.168.2.9';
+const ip = '192.168.2.11';
 var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
 function ascii2html(ascii){
@@ -180,14 +180,14 @@ App.get('/blog/edit',(req,res)=>{
 });
 App.post('/blog/edit',(req,res)=>{
 	console.log("Submitted data",req.body.submit, req.body.post_name);
-	invalidRequest = false;	
+	invalidRequest = false;
+	req.body.post_link = convertLinkFormat(req.body.post_name);
 	switch(req.body.submit){
 		case 'Edit': // First, make html safe stuff into actual ascii, then, make ascii into url safe stuff, then send it to the edit_post route. From there, decode the url and then make the ascii back into html safe stuff and compare it against the database.
-			console.log("Handler: "+ req.body.post_name);
-			res.redirect('/blog/edit_post?id='+req.body.post_name);
+			res.redirect('/blog/edit_post?post_link='+req.body.post_link);
 			break;
 		case 'View':
-			res.redirect('/blog/post/'+req.body.post_name);
+			res.redirect('/blog/post/'+req.body.post_link);
 			break;
 		case 'Remove':
 			var client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -211,6 +211,7 @@ App.post('/blog/edit',(req,res)=>{
 });
 
 App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
+	console.log(req.query.id);
 	if(req.query.post_link != null){ // Ensuring the query variable exists in the request
 		console.log("req.query.post_link: ",req.query.post_link);
 		var postData;
