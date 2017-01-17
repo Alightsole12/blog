@@ -64,21 +64,22 @@ App.get('/',(req,res)=>{
 // The main blog page
 App.get('/blog',(req,res)=>{
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	var data = [];
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
 		var query = client.query(
-			`SELECT * FROM blog SORT BY date;`
+			`SELECT * FROM blog ORDER BY date;`
 		);
 		query.on('row',(row)=>{
-			console.log("Row recieved.");
+			console.log("Row recieved:",JSON.stringify(row));
+			data.push(row);
 		}); // Below not implemented yet
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
-			console.log(data);
 			console.log("Query complete, Connection terminated.");
-			if(data == null) res.redirect("/404");
-			else res.render("post",JSON.parse(data)); // Sending data to the view
+			res.render('blog',{data});
 		});
+	});
 });
 
 // A specific blog post
