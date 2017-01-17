@@ -1,5 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
-// TODO: Display posts in order by time posted in the edit section
+// TODO: Work on the /blog page
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -160,7 +160,7 @@ App.get('/blog/edit',(req,res)=>{
 		client.connect((err)=>{
 			console.log("Connection success, querying in progress...");
 			var query = client.query(
-				`SELECT * FROM blog`
+				`SELECT * FROM blog ORDER BY date`
 			);
 			query.on('row',(row)=>{
 				row.title = ascii2html(row.title);
