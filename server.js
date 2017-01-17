@@ -1,6 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
-// TODO: Get the view button working with the new links
-// TODO: Make an algorithm that would make post_link entries for the current posts
+// TODO: Display posts in order by time posted in the edit section
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
