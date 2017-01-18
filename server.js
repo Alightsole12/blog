@@ -1,4 +1,5 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
+// TODO: Work on the /blog page
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -6,26 +7,44 @@ const http = require('http'),
 	bodyParser = require('body-parser'),
 	helmet = require('helmet'),
 	ejs = require('ejs'),
-	multer = require('multer'),
 	pg = require('pg');
 
 // SET ENV VARIABLES
-const ip = '192.168.2.9';
+const address = 'localhost';
 var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
+function ascii2html(ascii){
+	// Returns html-safe code from ascii
+	return ascii.replace(/\'/g,"&apos;").replace(/\"/g,"&quot;").replace(/\`/g,"&#96;");
+}
+function html2ascii(html){
+	// Returns ascii from html-safe code
+	return html.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");
+}
+function convertLinkFormat(str){
+	str = html2ascii(str);
+	var validCharacter;
+	var tempStr = str.toLowerCase().split("");
+	var allowedCharacters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','0','1','2','3','4','5','6','7','8','9','-','_'];
+	for(var i = 0; i <= tempStr.length; i++){
+		// For every character in the string
+		validCharacter = false;
+		for(var j = 0; j <= allowedCharacters.length; j++){
+			// Comparing it against every character in the allowedCharacters array
+			if(tempStr[i] == " ") tempStr[i] = "-";
+			if(tempStr[i] == allowedCharacters[j]) validCharacter = true;
+		}
+		if(!validCharacter) tempStr[i] = "";
+	}
+	var alteredStr = "";
+	for(var i = 0; i <= tempStr.length; i++){
+		if(tempStr[i] != null) alteredStr += tempStr[i];
+	}
+	return alteredStr;
+}
 if(typeof debug == 'string')
 	debug = false;
 var finish = typeof debug;
-
-//client.connect(); // Connecting to the database
-//const query = client.query( // Making the query // Title, txt link on server, date posted, 
-	//`CREATE TABLE blog(
-		//title varchar(255),
-		//date date,
-		//link varchar(255)
-	//);`
-//);
-//query.on('end',()=>{client.end();}); // Once the query is complete, the client will close
 
 // App Setup
 const App = express();
@@ -34,44 +53,61 @@ App.use(express.static('public'));
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
 App.use(helmet());
-App.use(multer({dest:'./uploads'}).any()); // We may need to change this in the future
 App.set('view engine','ejs');
 
 // Routing
-// The homepage of the site
+// The landing page
 App.get('/',(req,res)=>{
 	res.send("Hello world! <a href='/blog'>Blog</a>");
 });
 
 // The main blog page
 App.get('/blog',(req,res)=>{
-	fs.readFile("data/recent.json","utf-8",(err,data)=>{
-		const recent = JSON.parse(data).recent;
-		console.log(`URL Query: ${req.query.page}`);
-		console.log(recent[0]);
-		var recentPosts = [];
-		for(var i = 0; i<= 4; i++){
-			recentPosts.push(recent[i*req.query.page]);
-		}
-		console.log(recentPosts);
-		res.render("blog",{"recents":recentPosts});
+	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	var data = [];
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(
+			`SELECT * FROM blog ORDER BY date;`
+		);
+		query.on('row',(row)=>{
+			console.log("Row recieved:",JSON.stringify(row));
+			const tempDate = row.date.toString().split(" ");
+			row.date = `${tempDate[1]} ${tempDate[2]}, ${tempDate[3]}`;
+			data.push(row);
+		}); // Below not implemented yet
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+			res.render('blog',{data});
+		});
 	});
 });
 
 // A specific blog post
 App.get('/blog/post/*',(req,res)=>{
-	const urlData = req.url.split("/");
-	const postLink = `public/posts/${urlData[2]}/${urlData[3]}/${urlData[4]}/${urlData[5]}.json`;
-	const renderPost = ()=>{
-		fs.readFile(postLink,"utf-8",(err,data)=>{
-			res.render("post",JSON.parse(data));
+	// Grab the title from the url and then use it to grab db data and send it to ejs, else redirect
+	var data;
+	const urlData = req.url.split("/"); // Picking apart the URL data to see which post is being requested
+	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log(urlData);
+	console.log("Connecting to the database...");
+	client.connect((err)=>{
+		console.log("Connection success, querying in progress...");
+		var query = client.query(
+			`SELECT * FROM blog WHERE post_link='${urlData[3]}';`
+		); // Checking if it exists in the database, converting ascii to html safe characters like in the records
+		query.on('row',(row)=>{
+			console.log("Row recieved.");
+			data = JSON.stringify(row);
 		});
-	};
-	fs.stat(postLink,(err,stat)=>{
-		if(err == null)
-			renderPost();
-		else
-			res.redirect("/404");
+		query.on('end',()=>{ // Once the query is complete, the client will close
+			client.end();
+			console.log(data);
+			console.log("Query complete, Connection terminated.");
+			if(data == null) res.redirect("/404");
+			else res.render("post",JSON.parse(data)); // Sending data to the view
+		});
 	});
 });
 
@@ -88,14 +124,16 @@ App.get('/signin',(req,res)=>{
 
 App.get('/blog/new',(req,res)=>{
 	res.render("blog_new",{});
+	// Implement below later for security
 	//res.redirect('/signin?target=blog/new');
 });
 App.post('/blog/new',(req,res)=>{
 	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
-	var postTitle = req.body.post_title.replace("\'","&apos;").replace("\"","&quot");
-	var postBody = req.body.post_body.replace("\'","&apos;").replace("\"","&quot");
+	var postTitle = ascii2html(req.body.post_title);
+	var postBody = ascii2html(req.body.post_body);
+	var postLink = convertLinkFormat(postTitle);
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
 		console.log("Data Sanitization Complete.");
 		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -103,8 +141,8 @@ App.post('/blog/new',(req,res)=>{
 		client.connect((err)=>{
 			console.log("Connection success, querying in progress...");
 			var query = client.query(
-				`INSERT INTO blog(title,date,body)
-				VALUES('${postTitle}','${currentDate}','${postBody}');`
+				`INSERT INTO blog(title,date,body,post_link)
+				VALUES('${postTitle}','${currentDate}','${postBody}','${postLink}');`
 			);
 			query.on('end',()=>{ // Once the query is complete, the client will close
 				client.end();
@@ -129,45 +167,146 @@ App.get('/blog/edit',(req,res)=>{
 		client.connect((err)=>{
 			console.log("Connection success, querying in progress...");
 			var query = client.query(
-				`SELECT * FROM blog`
+				`SELECT * FROM blog ORDER BY date`
 			);
 			query.on('row',(row)=>{
-				row.title = row.title.replace("&apos;","\'").replace("&quot","\"");
-				row.body = row.body.replace("&apos;","\'").replace("&quot","\"");
+				row.title = ascii2html(row.title);
+				row.body = ascii2html(row.body);
 				postsArray.push(row);
 			});
 			query.on('end',()=>{ // Once the query is complete, the client will close
 				client.end();
 				console.log("Query complete, Connection terminated.");
 				res.render("blog_edit",{"postsArray":postsArray});
-				console.log(JSON.stringify(postsArray));
 			});
 		});
 	//else
+		// Implement below for security
 		//res.redirect('/signin?target=blog/edit');
 });
 App.post('/blog/edit',(req,res)=>{
 	console.log("Submitted data",req.body.submit, req.body.post_name);
-	// Build queryString here
+	invalidRequest = false;
+	req.body.post_link = convertLinkFormat(req.body.post_name);
 	switch(req.body.submit){
+		case 'Edit': // First, make html safe stuff into actual ascii, then, make ascii into url safe stuff, then send it to the edit_post route. From there, decode the url and then make the ascii back into html safe stuff and compare it against the database.
+			res.redirect('/blog/edit_post?post_link='+req.body.post_link);
+			break;
+		case 'View':
+			res.redirect('/blog/post/'+req.body.post_link);
+			break;
 		case 'Remove':
-			const queryString = "DELETE FROM blog WHERE title='"+req.body.post_name+"';";
+			var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+			console.log("Connecting to the database...");
+			client.connect((err)=>{
+				console.log("Connection success, querying in progress...");
+				var query = client.query("DELETE FROM blog WHERE title='"+req.body.post_name+"';");
+				query.on('end',()=>{ // Once the query is complete, the client will close
+					client.end();
+					console.log("Query complete, Connection terminated.");
+					res.redirect('/blog/edit');
+				});
+			});
 			break;
 		default:
 			console.log("Error: Invalid Request");
+			invalidRequest = true;
+			res.redirect('/blog/edit');
 			break;
 	}
+});
+
+App.get('/blog/edit_post',(req,res)=>{ // Use the query string to get db data then send it into a form
+	console.log(req.query.id);
+	if(req.query.post_link != null){ // Ensuring the query variable exists in the request
+		console.log("req.query.post_link: ",req.query.post_link);
+		var postData;
+		const queryString = `SELECT * FROM blog WHERE post_link='${req.query.post_link}';`;
+		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+		console.log("Connecting to the database...");
+		client.connect((err)=>{
+			console.log("Connection success, querying in progress...");
+			var query = client.query(queryString);
+			query.on('row',(row)=>{
+				postData = row;
+				console.log(postData);
+			});
+			query.on('end',()=>{ // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+				if(typeof postData == 'undefined'){
+					console.log("Database has no records for such post!");
+					res.redirect('/blog/edit');
+				}else{
+					res.render('edit_post',{"postData":postData});
+				}
+			});
+		});
+	}else{
+		res.redirect('/blog/edit');
+	}
+});
+App.post('/blog/edit_post?*',(req,res)=>{
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err)=>{
 		console.log("Connection success, querying in progress...");
-		var query = client.query(queryString);
+		// Updating the title and body to the data sent
+		var query = client.query(`
+			UPDATE blog
+			SET title='${ascii2html(req.body.post_title)}',body='${ascii2html(req.body.post_body)}'
+			WHERE title='${req.query.old_title}';
+		`);
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			res.redirect('/blog/edit');
+			console.log(typeof postData == 'undefined');
 		});
 	});
+	res.redirect('/blog/edit');
+});
+
+// API
+App.get('/api',(req,res)=>{
+	var postData;
+	console.log("API call in progress...");
+	console.log(req.query.post_link);
+	if(typeof req.query.target == 'undefined'){
+		res.send('{"err":"target not defined! Please see API docs!"}');
+	}else{
+		switch(req.query.target){
+			case 'blog': 
+				if(typeof req.query.post_link == 'undefined'){
+					res.send('{"err":"post_link not defined! Please see API docs!"}');
+				}else{
+					var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+					console.log("Connecting to the database...");
+					client.connect((err)=>{
+						console.log("Connection success, querying in progress...");
+						var query = client.query(`SELECT * FROM blog WHERE post_link='${req.query.post_link}';`);
+						query.on('row',(row)=>{
+							postData = row;
+							console.log(row);
+						});
+						query.on('end',()=>{ // Once the query is complete, the client will close
+							client.end();
+							console.log("Query complete, Connection terminated.");
+							if(typeof postData == 'undefined'){
+								res.send('{"err":"Post does not exist!"}');
+							}else{
+								// Solution: Decode the html-safe characters on the client-side
+								res.send(JSON.stringify(postData));
+							}
+						});
+					});
+				}
+				break;
+			default:
+				res.send('{"err":"Unknown target! Please see API docs!"}');
+				break;
+		}
+	}
+	console.log("API call complete");
 });
 
 // If the client's GET request matches none of the availible ones, it'll end up here
@@ -176,6 +315,6 @@ App.get('/*',(req,res)=>{
 });
 
 // Server Launch
-App.listen(port,()=>{
-	console.log(`App running on ${ip}:${port}`);
+App.listen(port,address,()=>{
+	console.log(`App running on ${address}:${port}`);
 });

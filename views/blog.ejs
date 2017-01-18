@@ -15,6 +15,9 @@
 		</div>
 		<div id='col-sm-7'>
 			<!-- Angular will load the first couple hundred of characters, along with a ... at the end, as a sort of preview -->
+			<h2><%= data[1].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
+			<p>Posted on: <%= data[1].date %></p>
+			<p><%= data[1].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></p>
 		</div>
 		<div id='col-sm-1'>
 		</div>

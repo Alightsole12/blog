@@ -2,7 +2,7 @@
   "name": "blog",
   "version": "0.8.1",
   "description": "A blog about my various programming misadventures.",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,7 +20,6 @@
     "gulp-stylus": "^2.5.0",
     "gulp-uglify": "^2.0.0",
     "helmet": "^3.1.0",
-    "multer": "^1.2.0",
     "pg": "^6.1.0"
   }
 }

@@ -1,9 +1,12 @@
 <!doctype html>
-<html>
+<html ng-app="BlogApp">
 	<head>
-		<link rel="stylesheet" type="text/css" href="/css/styles.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" type="text/css" href="/css/styles.css"/>
+		<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js'></script>
+		<script type="text/javascript" src='/js/scripts.js'></script>
 	</head>
-	<body>
+	<body ng-controller="EditViewController">
 		<h1>Edit a Post</h1>
 		<hr/><!-- POSTS CANNOT BE NAMED THE SAME THING -->
 		<% for(var i = 0; i < postsArray.length; i++){ %>
@@ -11,9 +14,9 @@
 				<input style='visibility:hidden;' name="post_name" value="<%= postsArray[i].title %>"/>
 				<div>
 					<div class='edit_preview'>
-						<h2 class='edit_title'><%= postsArray[i].title %></h2>
-						<p class='edit_body'><%= postsArray[i].body %></p>
-						<p><span class='edit_date'>Date Posted: <%= postsArray[i].date %></span></p>
+						<h2 class='edit_title'><%= postsArray[i].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
+						<p class='edit_body'><%= postsArray[i].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'") %></p>
+						<p><span class='edit_date'>Posted: <%= `${postsArray[i].date.toString().split(" ")[1]} ${postsArray[i].date.toString().split(" ")[2]}, ${postsArray[i].date.toString().split(" ")[3]}` %></span></p>
 					</div>
 					<div class='edit_wrapper'>
 						<ul class='edit_gui'>

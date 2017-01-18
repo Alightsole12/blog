@@ -4,7 +4,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<link rel='stylesheet' type='text/css' href='/css/grid.css' media='(min-width:481px)'/>
 		<link rel='stylesheet' type='text/css' href='/css/styles.css'/>
-		<title><%= title %></title>
+		<title><%= title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></title>
 	</head>
 	<body>
 		<div class='show-desktop'>
@@ -13,10 +13,10 @@
 			</div>
 		</div>
 		<div class='col-sm-8'>
-			<h2 id='title'><%= title %></h2>
+			<h2 id='title'><%= title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
 			<p id='date'><%= date %></p>
 			<hr/>
-			<p id='content'><%- content %></p>
+			<p id='content'><%= body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></p>
 		</div>
 		<div class='col-sm-1'>
 		</div>
