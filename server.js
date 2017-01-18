@@ -10,7 +10,7 @@ const http = require('http'),
 	pg = require('pg');
 
 // SET ENV VARIABLES
-const ip = '192.168.2.11';
+const address = 'localhost';
 var port = process.env.PORT || 8000;
 var debug = process.env.debug || true;
 function ascii2html(ascii){
@@ -313,6 +313,6 @@ App.get('/*',(req,res)=>{
 });
 
 // Server Launch
-App.listen(port,()=>{
+App.listen(port,address,()=>{
 	console.log(`App running on ${ip}:${port}`);
 });
