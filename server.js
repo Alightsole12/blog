@@ -72,6 +72,8 @@ App.get('/blog',(req,res)=>{
 		);
 		query.on('row',(row)=>{
 			console.log("Row recieved:",JSON.stringify(row));
+			const tempDate = row.date.toString().split(" ");
+			row.date = `${tempDate[1]} ${tempDate[2]}, ${tempDate[3]}`;
 			data.push(row);
 		}); // Below not implemented yet
 		query.on('end',()=>{ // Once the query is complete, the client will close
@@ -314,5 +316,5 @@ App.get('/*',(req,res)=>{
 
 // Server Launch
 App.listen(port,address,()=>{
-	console.log(`App running on ${ip}:${port}`);
+	console.log(`App running on ${address}:${port}`);
 });
