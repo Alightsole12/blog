@@ -1,5 +1,6 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 // TODO: Work on the /blog page
+// Maybe an "add image" button on /new and /edit? would open small input field where you enter the url and then it inserts an <a> tag into the field
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -72,10 +73,11 @@ App.get('/blog',(req,res)=>{
 		);
 		query.on('row',(row)=>{
 			console.log("Row recieved:",JSON.stringify(row));
+			row.body = row.body.slice(0,400);
 			const tempDate = row.date.toString().split(" ");
 			row.date = `${tempDate[1]} ${tempDate[2]}, ${tempDate[3]}`;
 			data.push(row);
-		}); // Below not implemented yet
+		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
