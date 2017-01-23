@@ -10,16 +10,21 @@
 		<title>Blog Overview</title>
 	</head>
 	<body ng-app='BlogApp' ng-controller='PreviewController'>
-		<div id='col-sm-4'>
+		<div class='col-sm-4 show-desktop'>
+			<p>test</p>
 			<!-- This will be an aside (featuring other crap on the site) -->
 		</div>
-		<div id='col-sm-7'>
+		<div class='col-sm-7'>
 			<!-- Angular will load the first couple hundred of characters, along with a ... at the end, as a sort of preview -->
-			<h2><%= data[1].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
-			<p>Posted on: <%= data[1].date %></p>
-			<p><%= data[1].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></p>
+			<% for (var i = 0; i < data.length; i++) { %>
+				<div id='post-preview'>
+					<h2 id='title'><%= data[i].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
+					<p id='date'>Posted on: <%= data[i].date %></p>
+					<p id='content'><%= data[i].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %>... <a href='/blog/post/<%= data[i].post_link %>'>Read More</a></p>
+				</div>
+			<% } %>
 		</div>
-		<div id='col-sm-1'>
+		<div class='col-sm-1 show-desktop'>
 		</div>
 	</body>
 </html>

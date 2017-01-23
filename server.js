@@ -1,5 +1,6 @@
 // BUG: It thinks the tablets screen is too small because of chrome's bloaty url bar
 // TODO: Work on the /blog page
+// Maybe an "add image" button on /new and /edit? would open small input field where you enter the url and then it inserts an <a> tag into the field
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
@@ -72,16 +73,21 @@ App.get('/blog',(req,res)=>{
 		);
 		query.on('row',(row)=>{
 			console.log("Row recieved:",JSON.stringify(row));
+			row.body = row.body.slice(0,400);
 			const tempDate = row.date.toString().split(" ");
 			row.date = `${tempDate[1]} ${tempDate[2]}, ${tempDate[3]}`;
 			data.push(row);
-		}); // Below not implemented yet
+		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
 			res.render('blog',{data});
 		});
 	});
+});
+
+App.get('/blog/post/',(req,res)=>{
+	res.redirect('/blog');
 });
 
 // A specific blog post
@@ -189,7 +195,7 @@ App.post('/blog/edit',(req,res)=>{
 	invalidRequest = false;
 	req.body.post_link = convertLinkFormat(req.body.post_name);
 	switch(req.body.submit){
-		case 'Edit': // First, make html safe stuff into actual ascii, then, make ascii into url safe stuff, then send it to the edit_post route. From there, decode the url and then make the ascii back into html safe stuff and compare it against the database.
+		case 'Edit':
 			res.redirect('/blog/edit_post?post_link='+req.body.post_link);
 			break;
 		case 'View':
@@ -275,7 +281,7 @@ App.get('/api',(req,res)=>{
 		res.send('{"err":"target not defined! Please see API docs!"}');
 	}else{
 		switch(req.query.target){
-			case 'blog': 
+			case 'blog':
 				if(typeof req.query.post_link == 'undefined'){
 					res.send('{"err":"post_link not defined! Please see API docs!"}');
 				}else{
