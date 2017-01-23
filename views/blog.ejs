@@ -10,10 +10,11 @@
 		<title>Blog Overview</title>
 	</head>
 	<body ng-app='BlogApp' ng-controller='PreviewController'>
-		<div id='col-sm-4'>
+		<div class='col-sm-4 show-desktop'>
+			<p>test</p>
 			<!-- This will be an aside (featuring other crap on the site) -->
 		</div>
-		<div id='col-sm-7'>
+		<div class='col-sm-7'>
 			<!-- Angular will load the first couple hundred of characters, along with a ... at the end, as a sort of preview -->
 			<% for (var i = 0; i < data.length; i++) { %>
 				<div id='post-preview'>
@@ -23,7 +24,7 @@
 				</div>
 			<% } %>
 		</div>
-		<div id='col-sm-1'>
+		<div class='col-sm-1 show-desktop'>
 		</div>
 	</body>
 </html>
