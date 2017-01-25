@@ -72,7 +72,7 @@ App.get('/blog',(req,res)=>{
 			`SELECT * FROM blog ORDER BY date;`
 		);
 		query.on('row',(row)=>{
-			console.log("Row recieved:",JSON.stringify(row));
+			console.log("Row received:",JSON.stringify(row));
 			row.body = row.body.slice(0,400);
 			const tempDate = row.date.toString().split(" ");
 			row.date = `${tempDate[1]} ${tempDate[2]}, ${tempDate[3]}`;
@@ -104,7 +104,7 @@ App.get('/blog/post/*',(req,res)=>{
 			`SELECT * FROM blog WHERE post_link='${urlData[3]}';`
 		); // Checking if it exists in the database, converting ascii to html safe characters like in the records
 		query.on('row',(row)=>{
-			console.log("Row recieved.");
+			console.log("Row received.");
 			data = JSON.stringify(row);
 		});
 		query.on('end',()=>{ // Once the query is complete, the client will close
@@ -141,7 +141,7 @@ App.post('/blog/new',(req,res)=>{
 	var postBody = ascii2html(req.body.post_body);
 	var postLink = convertLinkFormat(postTitle);
 	if(postTitle.length < 256 && postTitle.length > 0 && postBody.length < 10000 && postBody.length > 0){
-		console.log("Data Sanitization Complete.");
+		console.log("Data Sanitation Complete.");
 		const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 		console.log("Connecting to the database...");
 		client.connect((err)=>{
@@ -315,7 +315,7 @@ App.get('/api',(req,res)=>{
 	console.log("API call complete");
 });
 
-// If the client's GET request matches none of the availible ones, it'll end up here
+// If the client's GET request matches none of the available ones, it'll end up here
 App.get('/*',(req,res)=>{
 	res.redirect("/404");
 });
