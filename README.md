@@ -11,7 +11,8 @@ Setting up the server:
 1. Type 
 ```
 git clone https://github.com/TylerWalker12/blog.git
-``` in the desired directory of the files (this will create a folder called 'blog' containing everything in the repo).
+```
+in the desired directory of the files (this will create a folder called 'blog' containing everything in the repo).
 2. Type 'npm install' in the 'blog' folder, this will install the various dependencies required by the project.
 3. Add environment variables for the following: 
 
