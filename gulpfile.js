@@ -7,7 +7,7 @@ const gulp = require('gulp'),
 	uglify = require('gulp-uglify');
 
 // CSS
-gulp.task('css',()=>{
+gulp.task('css', () => {
 	return gulp.src('public/css/stylus/*.styl')
 		.pipe(concat('styles.styl'))
 		.pipe(stylus())
@@ -16,7 +16,7 @@ gulp.task('css',()=>{
 });
 
 // JS
-gulp.task('js',()=>{
+gulp.task('js', () => {
 	return gulp.src('public/js/angular/**/*.js')
 		.pipe(concat('scripts.js'))
 		.pipe(babel({presets:['es2015']}))
@@ -25,7 +25,7 @@ gulp.task('js',()=>{
 });
 
 // Default
-gulp.task('default',()=>{
-	gulp.watch(['public/css/stylus/*.styl'],['css']);
-	gulp.watch(['public/js/**/*.js'],['js']);
+gulp.task('default', () => {
+	gulp.watch(['public/css/stylus/*.styl'], ['css']);
+	gulp.watch(['public/js/**/*.js'], ['js']);
 });
