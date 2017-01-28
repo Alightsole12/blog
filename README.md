@@ -1,20 +1,20 @@
 ## Overview
-This is a simple webapp fir running a personal blog on, built entirely on NodeJS. Current;y Express is also integrated with the webapp along with postgres as a database. This was built entirely in my spare time as a hobby project. You can see the project in action here (TBA).
+This is a simple webapp fir running a personal blog on, built entirely on NodeJS. Currently Express is also integrated with the webapp along with postgres as a database. This was built entirely in my spare time as a hobby project. You can see the project in action here (TBA).
 
 ## Cloning/forks
 If you'd like to use this project for your _own_ blog, you're entirely welcome to do so. However, I have a few requests in the event that you decide to do so:
-	- Alter the styles a bit, use different colors so yours has a different look to it than the original.
-	- Give credit somewhere on the site, preferably in the form of a link back to the repo.
-	- Do not use it for commercial purposes (such as selling it for profit), in specific, building a similar webapp for a company and just making a clone of this repo would be an example of a commercial purpose.
-	- Do not claim the code as your own, make it clear that it was based on this project.
-	- I'd like to be notified if you make your own blog with this code, I'd love to see what my code ends up starting up!
+- Alter the styles a bit, use different colors so yours has a different look to it than the original.
+- Give credit somewhere on the site, preferably in the form of a link back to the repo.
+- Do not use it for commercial purposes (such as selling it for profit), in specific, building a similar webapp for a company and just making a clone of this repo would be an example of a commercial purpose.
+- Do not claim the code as your own, make it clear that it was based on this project.
+- I'd like to be notified if you make your own blog with this code, I'd love to see what my code ends up starting up!
 
 ## Setup
 Things you'll need:
-	- A command line capable of running Git and NodeJS
-	- Git
-	- NodeJS
-	- A PostgreSQL database
+- A command line capable of running Git and NodeJS
+- Git
+- NodeJS
+- A PostgreSQL database
 
 Setting up the server:
 
