@@ -125,12 +125,17 @@ App.get('/signin', (req, res) => {
 
 // The page where new posts are created and added to the database
 App.get('/blog/new', (req, res) => {
-	res.render("blog_new",{});
-	// Implement below later for security
-	//res.redirect('/signin?target=blog/new');
+	res.redirect('/signin?target=blog/new');
 });
+
 // Sending the data from the previous GET request to the database
 App.post('/blog/new', (req, res) => {
+		// Ensuring only authorized users can view the page
+		if (req.body.username == process.env.adminUsername && req.body.password == process.env.adminPassword) res.render("blog_new",{});
+		else res.redirect('/signin?target=blog/new');
+});
+
+App.post('/blog/new_handler', (req, res) => {
 	console.log("Sanitizing Data...");
 	const date = new Date();
 	var currentDate = `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()-2000}`;
@@ -150,20 +155,22 @@ App.post('/blog/new', (req, res) => {
 			query.on('end', () => { // Executed once the query is complete
 				client.end();
 				console.log("Query complete, Connection terminated.");
+				res.redirect('/blog');
 			});
 		});
-		// Ensuring only authorized users can view the page
-		if (req.body.username == process.env.username && req.body.password == process.env.password) res.render("blog_new",{});
-		else res.redirect('/signin?target=blog/new');
 	} else {
 		console.log("Error: post_title or post_body exceeded character limit");
 		res.render('blog_new', {error:"Error: post_title or post_body exceeded character limit"});
 	}
 });
 
-// The page where the posts can be viewed/managed
 App.get('/blog/edit', (req, res) => {
-	//if(req.body.username == process.env.username && req.body.password == process.env.password) // Verifying that the inputed credentials match the admin ones
+	res.redirect('/signin?target=blog/edit');
+});
+
+// The page where the posts can be viewed/managed
+App.post('/blog/edit', (req, res) => {
+	if (req.body.username == process.env.adminUsername && req.body.password == process.env.adminPassword) {
 		var postsArray = [];
 		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 		console.log("Connecting to the database...");
@@ -184,10 +191,14 @@ App.get('/blog/edit', (req, res) => {
 			});
 		});
 	// Implement below when the server goes public
-	//else res.redirect('/signin?target=blog/edit');
+	} else {
+		console.log(`Bad password, expected ${process.env.adminUsername}, got ${req.body.username}, expected ${process.env.adminPassword}, got ${req.body.password}.`);
+		res.redirect('/signin?target=blog/edit');
+	}
 });
+
 // Sending the data to the database from the GET request
-App.post('/blog/edit', (req, res) => {
+App.post('/blog/edit_handler', (req, res) => {
 	console.log("Submitted data",req.body.submit, req.body.post_name);
 	invalidRequest = false;
 	req.body.post_link = convertLinkFormat(req.body.post_name);
@@ -250,6 +261,7 @@ App.get('/blog/edit_post', (req, res) => { // Use the query string to get db dat
 		res.redirect('/blog/edit');
 	}
 });
+
 App.post('/blog/edit_post?*', (req, res) => {
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
