@@ -5,8 +5,7 @@ const http = require('http'),
 	bodyParser = require('body-parser'),
 	helmet = require('helmet'),
 	ejs = require('ejs'),
-	pg = require('pg'),
-	marked = require('marked');
+	pg = require('pg');
 
 // Setting environment variables
 const address = 'localhost';
