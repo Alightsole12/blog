@@ -198,7 +198,6 @@ App.post('/blog/edit', (req, res) => {
 
 // Sending the data to the database from the GET request
 App.post('/blog/edit_handler', (req, res) => {
-	console.log("Submitted data",req.body.submit, req.body.post_name);
 	invalidRequest = false;
 	req.body.post_link = convertLinkFormat(req.body.post_name);
 	switch (req.body.submit) {
@@ -231,9 +230,7 @@ App.post('/blog/edit_handler', (req, res) => {
 
 // The place where post can be edited individually
 App.get('/blog/edit_post', (req, res) => { // Use the query string to get db data then send it into a form
-	console.log(req.query.id);
 	if (req.query.post_link != null) { // Ensuring the query variable exists in the request
-		console.log("req.query.post_link: ", req.query.post_link);
 		var postData;
 		const queryString = `SELECT * FROM blog WHERE post_link='${req.query.post_link}';`;
 		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -243,7 +240,6 @@ App.get('/blog/edit_post', (req, res) => { // Use the query string to get db dat
 			var query = client.query(queryString);
 			query.on('row', (row) => {
 				postData = row;
-				console.log(postData);
 			});
 			query.on('end', () => { // Once the query is complete, the client will close
 				client.end();
@@ -275,7 +271,6 @@ App.post('/blog/edit_post?*', (req, res) => {
 		query.on('end', () => { // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
-			console.log(typeof postData == 'undefined');
 		});
 	});
 	res.redirect('/blog/edit');
@@ -285,7 +280,6 @@ App.post('/blog/edit_post?*', (req, res) => {
 App.get('/api', (req, res) => {
 	var postData;
 	console.log("API call in progress...");
-	console.log(req.query.post_link);
 	if (typeof req.query.target == 'undefined') {
 		res.send('{"err":"target not defined! Please see API docs!"}');
 	} else {
@@ -301,7 +295,6 @@ App.get('/api', (req, res) => {
 						var query = client.query(`SELECT * FROM blog WHERE post_link='${req.query.post_link}';`);
 						query.on('row', (row) => {
 							postData = row;
-							console.log(row);
 						});
 						query.on('end', () => { // Once the query is complete, the client will close
 							client.end();
