@@ -3,8 +3,8 @@
 	<head>
 		<link rel='stylesheet' type='text/css' href='/css/grid.css'/>
 		<link rel='stylesheet' type='text/css' href='/css/styles.css'/>
-		<script type='text/javascript' src='/lib/marked.js'></script>
 		<script type="text/javascript" charset="utf-8" src='https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js'></script>
+		<script type='text/javascript' src='/lib/marked.js'></script>
 		<script type="text/javascript" charset="utf-8" src='/js/scripts.js'></script>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -20,7 +20,10 @@
 				<div id='post-preview'>
 					<h2 id='title'><%= data[i].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
 					<p id='date'>Posted on: <%= data[i].date %></p>
-					<p id='content'><%= marked(data[i].body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'")); %>... <a href='/blog/post/<%= data[i].post_link %>'>Read More</a></p>
+					<p id='content-<%= i %>'></p>
+					<script type="text/javascript">
+						document.getElementById('content-<%= i %>').innerHTML = marked(`<%= data[i].body.replace(/&#96;/g,"\\\`").replace(/&quot;/g,"\\\"").replace(/&apos;/g,"\\\'"); %>... <a href='/blog/post/<%= data[i].post_link %>'>Read More</a>`);
+					</script>
 				</div>
 			<% } %>
 		</div>
