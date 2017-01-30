@@ -1,16 +1,27 @@
 // Desktop
 @media (min-width:481px)
 	.show-mobile
-		display:none
+		display none
+	p
+		font-size 1em
 
 // Mobile
-@media (max-width:480px)  // Portrait view
+@media (max-width:480px)
+	// Portrait view
 	.show-desktop
-		display:none
+		display none
+	p
+		font-size:1em
+	.post-preview
+		.post-content
+			font-size 1em
+		#date
+			font-size .9em
 
-@media (max-height:480px) // Landscape view
+@media (max-height:480px)
+	// Landscape view
 	.show-desktop
 		display:none
 	#post-preview
-		margin-top:2.5em
-		margin-left:2.5em
+		margin-top 2.5em
+		margin-left 2.5em
