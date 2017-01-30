@@ -25,7 +25,7 @@ gulp.task('js', () => {
 });
 
 // Default
-gulp.task('default', () => {
+gulp.task('default', ['css', 'js'], () => {
 	gulp.watch(['public/css/stylus/*.styl'], ['css']);
 	gulp.watch(['public/js/**/*.js'], ['js']);
 });
