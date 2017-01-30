@@ -1,5 +1,5 @@
 ## Overview
-This is a simple webapp fir running a personal blog on, built entirely on NodeJS. Currently Express is also integrated with the webapp along with postgres as a database. This was built entirely in my spare time as a hobby project. You can see the project in action here (TBA).
+This is a simple webapp fir running a personal blog on, built entirely on NodeJS. Currently Express is also integrated with the webapp along with postgres as a database. This was built entirely in my spare time as a hobby project. You can see the project in action here (will be added once the site is completed).
 
 ## Cloning/forks
 If you'd like to use this project for your _own_ blog, you're entirely welcome to do so. However, I have a few requests in the event that you decide to do so:
