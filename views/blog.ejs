@@ -11,23 +11,23 @@
 		<title>Blog Overview</title>
 	</head>
 	<body ng-app='BlogApp' ng-controller='PreviewController'>
-		<div class='col-sm-4 show-desktop'>
+		<div class='col-sm-2 show-desktop'>
 			<p>test</p>
 			<!-- This will be an aside (featuring other crap on the site) -->
 		</div>
 		<div class='col-sm-7'>
 			<% for (var i = 0; i < data.length; i++) { %>
-				<div id='post-preview'>
+				<div class='post-preview'>
 					<h2 id='title'><%= data[i].title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
 					<p id='date'>Posted on: <%= data[i].date %></p>
-					<p id='content-<%= i %>'></p>
+					<p class='post-content' id='content-<%= i %>'></p>
 					<script type="text/javascript">
-						document.getElementById('content-<%= i %>').innerHTML = marked(`<%= data[i].body.replace(/&#96;/g,"\\\`").replace(/&quot;/g,"\\\"").replace(/&apos;/g,"\\\'"); %>... <a href='/blog/post/<%= data[i].post_link %>'>Read More</a>`);
+						document.getElementById('content-<%= i %>').innerHTML = marked(`<%= data[i].body.replace(/&#96;/g,"\\\`").replace(/&quot;/g,"\\\"").replace(/&apos;/g,"\\\'"); %>... <a href='/blog/post/<%= data[i].post_link %>'>Read More</a>`).replace(/\n/,"<br/>");
 					</script>
 				</div>
 			<% } %>
 		</div>
-		<div class='col-sm-1 show-desktop'>
+		<div class='col-sm-3 show-desktop'>
 		</div>
 	</body>
 </html>
