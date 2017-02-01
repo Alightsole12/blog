@@ -5,7 +5,8 @@ const http = require('http'),
 	bodyParser = require('body-parser'),
 	helmet = require('helmet'),
 	ejs = require('ejs'),
-	pg = require('pg');
+	pg = require('pg'),
+	cookieParser = require('cookie-parser');
 
 // Setting environment variables
 const address = 'localhost';
@@ -45,6 +46,7 @@ function convertLinkFormat(str) {
 const App = express();
 App.set('views','./views');
 App.use(express.static('public'));
+App.use(cookieParser());
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
 App.use(helmet());
@@ -164,7 +166,8 @@ App.post('/blog/new_handler', (req, res) => {
 });
 
 App.get('/blog/edit', (req, res) => {
-	res.redirect('/signin?target=blog/edit');
+	//if (req.cookies['password'] == process.env.adminPassword) res.render("blog_edit");
+	else res.redirect('/signin?target=blog/edit');
 });
 
 // The page where the posts can be viewed/managed
@@ -184,6 +187,7 @@ App.post('/blog/edit', (req, res) => {
 				postsArray.push(row);
 			});
 			query.on('end', () => { // Once the query is complete, the client will close
+				res.cookie('password', req.body.password);
 				client.end();
 				console.log("Query complete, Connection terminated.");
 				res.render("blog_edit",{"postsArray":postsArray});
