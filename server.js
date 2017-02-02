@@ -1,7 +1,6 @@
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
-	request = require('request'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	helmet = require('helmet'),
@@ -124,7 +123,7 @@ App.get('/signin', (req, res) => {
 	//if (req.cookies['password'] == process.env.adminPassword)
 	// Make post request to target containing cookie password
 	const target = req.query.target; // Finding out where to redirect to after signing in
-	res.render("signin",{"target":target});
+	res.render("signin", {"target":target});
 });
 
 // The page where new posts are created and added to the database
