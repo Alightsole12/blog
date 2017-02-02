@@ -1,6 +1,7 @@
 // Middlewares
 const http = require('http'),
 	fs = require('fs'),
+	request = require('request'),
 	express = require('express'),
 	bodyParser = require('body-parser'),
 	helmet = require('helmet'),
@@ -120,6 +121,8 @@ App.get('/404', (req, res) => {
 
 // To ensure only admins have access to the database
 App.get('/signin', (req, res) => {
+	//if (req.cookies['password'] == process.env.adminPassword)
+	// Make post request to target containing cookie password
 	const target = req.query.target; // Finding out where to redirect to after signing in
 	res.render("signin",{"target":target});
 });
@@ -166,8 +169,7 @@ App.post('/blog/new_handler', (req, res) => {
 });
 
 App.get('/blog/edit', (req, res) => {
-	//if (req.cookies['password'] == process.env.adminPassword) res.render("blog_edit");
-	else res.redirect('/signin?target=blog/edit');
+	res.redirect('/signin?target=blog/edit');
 });
 
 // The page where the posts can be viewed/managed
