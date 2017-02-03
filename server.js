@@ -67,7 +67,6 @@ App.get('/blog', (req,res) => {
 			`SELECT * FROM blog ORDER BY date;`
 		);
 		query.on('row', (row) => { // Executed every time the server sends a row
-			console.log("Row received:", JSON.stringify(row));
 			row.body = row.body.slice(0,400);
 			const tempDate = row.date.toString().split(" ");
 			row.date = `${tempDate[1]} ${tempDate[2]}, ${tempDate[3]}`;
