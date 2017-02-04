@@ -4,21 +4,55 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<link rel='stylesheet' type='text/css' href='/css/grid.css' media='(min-width:481px)'/>
 		<link rel='stylesheet' type='text/css' href='/css/styles.css'/>
+		<script type='text/javascript' src='/lib/marked.js'></script>
 		<title><%= title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></title>
 	</head>
 	<body>
-		<div class='show-desktop'>
-			<div class='col-sm-3'>
-				<p>HI</p>
-			</div>
+		<div class='col-sm-2 show-desktop'>
 		</div>
 		<div class='col-sm-8'>
-			<h2 id='title'><%= title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
-			<p id='date'><%= date %></p>
-			<hr/>
-			<p id='content'><%= body.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></p>
+			<div class='col-sm-9' id='post-body'>
+				<h1 id='title'><%= title.replace(/&#96;/g,"\`").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"); %></h2>
+				<%
+					var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+				%>
+				<p id='date'>Posted: <%= `${months[parseInt(date.split("T")[0].split("-")[1])-1]} ${date.split("T")[0].split("-")[2]}, ${date.split("T")[0].split("-")[0]}` %></p>
+				<hr/>
+				<p id='content'></p>
+				<script type="text/javascript">
+					document.getElementById('content').innerHTML = marked(`<%= body.replace(/&#96;/g, "\`").replace(/&quot;/g, "\"").replace(/&apos;/g, "\'"); %>`)/*.replace(/\n/g, "<br/>")*/;
+				</script>
+			</div>
+			<div class='col-sm-3 show-desktop' id='post-aside'>
+				<p>Most Popular</p>
+				<ul>
+					<li><a href="#">Some post</a></li>
+				</ul>
+				<p>Recent</p>
+				<ul>
+					<li><a href="#">Another post</a></li>
+				</ul>
+				<p>By Tag</p>
+				<ul>
+					<li><a href="#">Some tag</a></li>
+				</ul>
+			</div>
 		</div>
-		<div class='col-sm-1'>
+		<div class='show-mobile' id='post-aside'>
+			<p>Most Popular</p>
+			<ul>
+				<li><a href="#">Some post</a></li>
+			</ul>
+			<p>Recent</p>
+			<ul>
+				<li><a href="#">Another post</a></li>
+			</ul>
+			<p>By Tag</p>
+			<ul>
+				<li><a href="#">Some tag</a></li>
+			</ul>
+		</div>
+		<div class='col-sm-2'>
 		</div>
 	</body>
 </html>

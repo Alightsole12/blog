@@ -1,3 +1,3 @@
-BlogApp.controller('PreviewController',($scope)=>{
+BlogApp.controller('PreviewController', ($scope) => {
 	$scope.test = "Hello World";
 });
