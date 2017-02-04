@@ -327,6 +327,6 @@ App.get('/*', (req, res) => {
 });
 
 // Server Launch
-App.listen(port, () {
+App.listen(port, () => {
 	console.log(`App running on ${address}:${port}`);
 });
