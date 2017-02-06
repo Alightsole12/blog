@@ -6,7 +6,8 @@ const http = require('http'),
 	helmet = require('helmet'),
 	ejs = require('ejs'),
 	pg = require('pg'),
-	cookieParser = require('cookie-parser');
+	cookieParser = require('cookie-parser'),
+	nodemailer = require('nodemailer');
 
 // Setting environment variables
 const address = 'localhost';
@@ -278,6 +279,29 @@ App.post('/blog/edit_post?*', (req, res) => {
 		});
 	});
 	res.redirect('/blog/edit');
+});
+
+App.post('/blog/subscribe', (req,res) => {
+	console.log(req.body.email);
+	let transporter = nodemailer.createTransport({
+		service: 'gmail',
+		auth: {
+			user: process.env.email,
+			pass: process.env.emailpass
+		}
+	});
+	let mailOptions = {
+		from: '"TaizNet Server" <' + process.env.email +'>',
+		to: req.body.email,
+		subject: 'Please confirm your email address',
+		text: 'Copy this link into your browser to confirm your subscription: ',
+		html: 'Copy this link into your browser to confirm your subscription or click <a href="#">here</a>'
+	};
+	transporter.sendMail(mailOptions, (err, data) => {
+		if (err) console.log(err);
+		console.log(`Message ${info.messageId} sent: ${info.response}`);
+	});
+	res.render('subscribe',{"email":req.body.email});
 });
 
 // API
