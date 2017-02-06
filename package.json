@@ -21,6 +21,7 @@
     "gulp-stylus": "^2.5.0",
     "gulp-uglify": "^2.0.0",
     "helmet": "^3.1.0",
+    "nodemailer": "^3.0.2",
     "pg": "^6.1.0"
   }
 }
