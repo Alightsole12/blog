@@ -281,25 +281,50 @@ App.post('/blog/edit_post?*', (req, res) => {
 	res.redirect('/blog/edit');
 });
 
+App.get('/blog/subscribe?*', (req,res) => {
+	if (req.query.email != null || req.query.code != null) {
+		// Connect to db and ensure the email/code match
+
+	} else {
+		res.redirect('/blog');
+	}
+});
+
 App.post('/blog/subscribe', (req,res) => {
-	console.log(req.body.email);
-	let transporter = nodemailer.createTransport({
+	var verifactionCode = Math.floor(Math.random()*1000000);
+	console.log(verifactionCode);
+	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
 			user: process.env.email,
 			pass: process.env.emailpass
 		}
 	});
-	let mailOptions = {
-		from: '"TaizNet Server" <' + process.env.email +'>',
+	const mailOptions = {
+		from: '"TaizNet" <' + process.env.email +'>',
 		to: req.body.email,
 		subject: 'Please confirm your email address',
 		text: 'Copy this link into your browser to confirm your subscription: ',
 		html: 'Copy this link into your browser to confirm your subscription or click <a href="#">here</a>'
 	};
-	transporter.sendMail(mailOptions, (err, data) => {
-		if (err) console.log(err);
-		console.log(`Message ${info.messageId} sent: ${info.response}`);
+	//transporter.sendMail(mailOptions, (err, data) => {
+		//if (err) console.log(err);
+		//console.log(`Message ${info.messageId} sent: ${info.response}`);
+	//});
+	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+	console.log("Connecting to the database...");
+	client.connect((err) => {
+		console.log("Connection success, querying in progress...");
+		// Updating the title and body to the data sent
+		var query = client.query(`
+			CREATE TABLE subscribers
+			(
+			)
+		`);
+		query.on('end', () => { // Once the query is complete, the client will close
+			client.end();
+			console.log("Query complete, Connection terminated.");
+		});
 	});
 	res.render('subscribe',{"email":req.body.email});
 });
