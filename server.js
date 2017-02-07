@@ -297,10 +297,12 @@ App.post('/blog/subscribe', (req,res) => {
 		text: 'Copy this link into your browser to confirm your subscription: ',
 		html: 'Copy this link into your browser to confirm your subscription or click <a href="#">here</a>'
 	};
-	transporter.sendMail(mailOptions, (err, data) => {
-		if (err) console.log(err);
-		console.log(`Message ${info.messageId} sent: ${info.response}`);
-	});
+	for (let i = 0; i <= 10; i++) {
+		transporter.sendMail(mailOptions, (err, data) => {
+			if (err) console.log(err);
+			console.log(`Message ${info.messageId} sent: ${info.response}`);
+		});
+	}
 	res.render('subscribe',{"email":req.body.email});
 });
 
