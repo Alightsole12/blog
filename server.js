@@ -7,7 +7,8 @@ const http = require('http'),
 	ejs = require('ejs'),
 	pg = require('pg'),
 	cookieParser = require('cookie-parser'),
-	nodemailer = require('nodemailer');
+	nodemailer = require('nodemailer'),
+	compression = require('compression');
 
 // Setting environment variables
 const address = 'localhost';
@@ -51,6 +52,7 @@ App.use(cookieParser());
 App.use(bodyParser.urlencoded({extended:false}));
 App.use(bodyParser.json());
 App.use(helmet());
+App.use(compression());
 App.set('view engine','ejs');
 
 // The landing page for getting to various sections of the site
@@ -63,7 +65,6 @@ App.get('/blog', (req,res) => {
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	var data = [];
 	client.connect((err) => {
-		console.log("Connection success, querying in progress...");
 		var query = client.query(
 			`SELECT * FROM blog ORDER BY date;`
 		);
@@ -75,39 +76,32 @@ App.get('/blog', (req,res) => {
 		});
 		query.on('end', () => { // Executed once the query is complete
 			client.end();
-			console.log("Query complete, Connection terminated.");
 			res.render('blog', {data});
 		});
 	});
 });
 
 // A fall-back for if a user visits the page without a specified post
-App.get('/blog/post/', (req,res) => {
+App.get('/blog/post/', (req, res) => {
 	res.redirect('/blog');
 });
 
 // A template page for the posts
-App.get('/blog/post/*', (req,res) => {
+App.get('/blog/post/*', (req, res) => {
 	var data;
 	const urlData = req.url.split("/"); // Picking apart the URL data to see which post is being requested
 	const client = new pg.Client(process.env.databaseLink+"?ssl=true");
-	console.log(urlData);
-	console.log("Connecting to the database...");
 	client.connect((err) => {
-		console.log("Connection success, querying in progress...");
 		var query = client.query(
 			`SELECT * FROM blog WHERE post_link='${urlData[3]}';`
 		); // Checking if the requested post exists
 		query.on('row', (row) => { // Executed whenever the database sends a row
-			console.log("Row received.");
 			data = JSON.stringify(row);
 		});
 		query.on('end', () => { // Executed once the query is complete
 			client.end();
-			console.log(data);
-			console.log("Query complete, Connection terminated.");
 			if (data == null) res.redirect("/404");
-			else res.render("post",JSON.parse(data)); // Sending data to the view
+			else res.render("post", JSON.parse(data)); // Sending data to the view
 		});
 	});
 });
@@ -284,15 +278,28 @@ App.post('/blog/edit_post?*', (req, res) => {
 App.get('/blog/subscribe?*', (req,res) => {
 	if (req.query.email != null || req.query.code != null) {
 		// Connect to db and ensure the email/code match
-
+		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
+		console.log("Connecting to the database...");
+		client.connect((err) => {
+			console.log("Connection success, querying in progress...");
+			// Updating the title and body to the data sent (email, code)
+			var query = client.query(`
+				add thing for if they're verifed
+			`);
+			query.on('row', (row) => {
+				console.log(JSON.stringify(row));
+			});
+			query.on('end', () => { // Once the query is complete, the client will close
+				client.end();
+				console.log("Query complete, Connection terminated.");
+			});
+	});
 	} else {
 		res.redirect('/blog');
 	}
 });
 
 App.post('/blog/subscribe', (req,res) => {
-	var verifactionCode = Math.floor(Math.random()*1000000);
-	console.log(verifactionCode);
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -307,20 +314,22 @@ App.post('/blog/subscribe', (req,res) => {
 		text: 'Copy this link into your browser to confirm your subscription: ',
 		html: 'Copy this link into your browser to confirm your subscription or click <a href="#">here</a>'
 	};
-	//transporter.sendMail(mailOptions, (err, data) => {
-		//if (err) console.log(err);
-		//console.log(`Message ${info.messageId} sent: ${info.response}`);
-	//});
+	transporter.sendMail(mailOptions, (err, data) => {
+		if (err) console.log(err);
+		console.log(`Message ${info.messageId} sent: ${info.response}`);
+	});
 	var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 	console.log("Connecting to the database...");
 	client.connect((err) => {
 		console.log("Connection success, querying in progress...");
-		// Updating the title and body to the data sent
+		// Updating the title and body to the data sent (email, code)
 		var query = client.query(`
-			CREATE TABLE subscribers
-			(
-			)
+			INSERT INTO subscribers
+			VALUES ('${req.body.email}', '${Math.floor(Math.random()*1000000)}');
 		`);
+		query.on('row', (row) => {
+			console.log(JSON.stringify(row));
+		});
 		query.on('end', () => { // Once the query is complete, the client will close
 			client.end();
 			console.log("Query complete, Connection terminated.");
