@@ -5,3 +5,5 @@ pd.txt
 npm-debug.log
 *.swp
 uploads
+blog.sublime-project
+blog.sublime-workspace
