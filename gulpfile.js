@@ -17,7 +17,7 @@ gulp.task('css', () => {
 
 // JS
 gulp.task('js', () => {
-	return gulp.src('public/js/angular/**/*.js')
+	return gulp.src('public/js/scripts/**/**/*.js')
 		.pipe(concat('scripts.js'))
 		.pipe(babel({presets:['es2015']}))
 		.pipe(uglify({mangle:false}))
