@@ -388,3 +388,8 @@ App.get('/*', (req, res) => {
 App.listen(port, () => {
 	console.log(`App running on ${address}:${port}`);
 });
+
+// Make the server ping itself every 5 minutes to prevent Dyno sleep
+setInterval(() => {
+	http.get("http://taiznet.herokuapp.com");
+}, 300000);
