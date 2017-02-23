@@ -66,7 +66,9 @@ App.get('/blog', (req,res) => {
 	var data = [];
 	client.connect((err) => {
 		var query = client.query(
-			`SELECT * FROM blog ORDER BY date;`
+			`SELECT *
+			FROM blog
+			ORDER BY date DESC;`
 		);
 		query.on('row', (row) => { // Executed every time the server sends a row
 			row.body = row.body.slice(0,400);
