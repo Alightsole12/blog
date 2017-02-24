@@ -317,7 +317,7 @@ App.post('/blog/subscribe', (req,res) => {
 		to: req.body.email,
 		subject: 'Please confirm your email address',
 		text: 'Copy this link into your browser to confirm your subscription: ',
-		html: `Copy the link below into your browser to confirm your subscription or click <a href="taiznet.herokuapp.com/subscribe?action=confirm&code=${confirmationCode}">here</a>`
+		html: `Copy the link below into your browser to confirm your subscription or click <a href="https://taiznet.herokuapp.com/subscribe?action=confirm&code=${confirmationCode}">here</a>`
 	};
 	transporter.sendMail(mailOptions, (err, data) => {
 		if (err) console.log(err);
