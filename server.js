@@ -277,8 +277,9 @@ App.post('/blog/edit_post?*', (req, res) => {
 	res.redirect('/blog/edit');
 });
 
-App.get('/blog/subscribe?*', (req,res) => {
+App.get('/blog/unsubscribe?*', (req,res) => {
 	if (req.query.email != null || req.query.code != null) {
+		console.log(req.query.code);
 		// Connect to db and ensure the email/code match
 		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
 		console.log("Connecting to the database...");
@@ -286,7 +287,8 @@ App.get('/blog/subscribe?*', (req,res) => {
 			console.log("Connection success, querying in progress...");
 			// Updating the title and body to the data sent (email, code)
 			var query = client.query(`
-				add thing for if they're verifed
+				SELECT *
+				FROM subscribers;
 			`);
 			query.on('row', (row) => {
 				console.log(JSON.stringify(row));
@@ -302,6 +304,7 @@ App.get('/blog/subscribe?*', (req,res) => {
 });
 
 App.post('/blog/subscribe', (req,res) => {
+	var confirmationCode = Math.floor(Math.random()*1000000);
 	const transporter = nodemailer.createTransport({
 		service: 'gmail',
 		auth: {
@@ -314,7 +317,7 @@ App.post('/blog/subscribe', (req,res) => {
 		to: req.body.email,
 		subject: 'Please confirm your email address',
 		text: 'Copy this link into your browser to confirm your subscription: ',
-		html: 'Copy this link into your browser to confirm your subscription or click <a href="#">here</a>'
+		html: `Copy the link below into your browser to confirm your subscription or click <a href="taiznet.herokuapp.com/subscribe?action=confirm&code=${confirmationCode}">here</a>`
 	};
 	transporter.sendMail(mailOptions, (err, data) => {
 		if (err) console.log(err);
@@ -327,7 +330,7 @@ App.post('/blog/subscribe', (req,res) => {
 		// Updating the title and body to the data sent (email, code)
 		var query = client.query(`
 			INSERT INTO subscribers
-			VALUES ('${req.body.email}', '${Math.floor(Math.random()*1000000)}');
+			VALUES ('${req.body.email}', '${confirmationCode}');
 		`);
 		query.on('row', (row) => {
 			console.log(JSON.stringify(row));
