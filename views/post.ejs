@@ -22,12 +22,13 @@
 				<script type="text/javascript">
 					document.getElementById('content').innerHTML = marked(`<%= body.replace(/&#96;/g, "\`").replace(/&quot;/g, "\"").replace(/&apos;/g, "\'"); %>`)/*.replace(/\n/g, "<br/>")*/;
 				</script>
-				<form action='/blog/subscribe' method='POST'>
+				<!-- Add back in when it's done -->
+				<!--<form action='/blog/subscribe' method='POST'>
 					<p id='subscribe'>
 						<i>Liked it? Want email notifications so you never miss a post? Simply enter your email into this box and follow the sent instructions to receive an email whenever I make a new post!</i>
 					</p>
 					<label for='email'><b>Email:</b></label> <input type="text" name="email"/><input type='submit' value='Submit'/>
-				</form>
+				</form>-->
 			</div>
 			<div class='col-sm-3 show-desktop' id='post-aside'>
 				<p>Most Popular</p>
