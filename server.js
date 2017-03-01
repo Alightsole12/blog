@@ -57,7 +57,7 @@ App.set('view engine','ejs');
 
 // The landing page for getting to various sections of the site
 App.get('/', (req,res) => {
-	res.send("Hello world! <a href='/blog'>Blog</a>");
+	res.send("This portion of the site is currently under maitenence, enjoy my <a href='/blog'>blog</a> while you wait!");
 });
 
 // The main blog page for viewing posts
@@ -277,8 +277,9 @@ App.post('/blog/edit_post?*', (req, res) => {
 	res.redirect('/blog/edit');
 });
 
-App.get('/blog/unsubscribe?*', (req,res) => {
-	if (req.query.email != null || req.query.code != null) {
+App.get('/blog/subscribe?*', (req,res) => {
+	var data = [];
+	if (req.query.action != null && req.query.email != null && req.query.code != null) {
 		console.log(req.query.code);
 		// Connect to db and ensure the email/code match
 		var client = new pg.Client(process.env.databaseLink+"?ssl=true");
@@ -288,14 +289,18 @@ App.get('/blog/unsubscribe?*', (req,res) => {
 			// Updating the title and body to the data sent (email, code)
 			var query = client.query(`
 				SELECT *
-				FROM subscribers;
+				FROM subscribers
+				WHERE email='${convertLinkFormat(req.query.email)}'
+				AND code='978243';
 			`);
 			query.on('row', (row) => {
+				data.push(row);
 				console.log(JSON.stringify(row));
 			});
 			query.on('end', () => { // Once the query is complete, the client will close
 				client.end();
 				console.log("Query complete, Connection terminated.");
+				res.send("Received data: " + data);
 			});
 	});
 	} else {
@@ -317,7 +322,7 @@ App.post('/blog/subscribe', (req,res) => {
 		to: req.body.email,
 		subject: 'Please confirm your email address',
 		text: 'Copy this link into your browser to confirm your subscription: ',
-		html: `Copy the link below into your browser to confirm your subscription or click <a href="http://taiznet.herokuapp.com/subscribe?action=confirm&code=${confirmationCode}">here</a><br/>http://taiznet.herokuapp.com/subscribe?action=confirm&code=${confirmationCode}`
+		html: `Copy the link below into your browser to confirm your subscription or click <a href="http://taiznet.herokuapp.com/blog/subscribe?action=confirm&code=${confirmationCode}">here</a><br/>http://taiznet.herokuapp.com/blog/subscribe?action=confirm&email=${convertLinkFormat(process.env.email)}&code=${confirmationCode}`
 	};
 	transporter.sendMail(mailOptions, (err, data) => {
 		if (err) console.log(err);
