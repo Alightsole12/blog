@@ -401,6 +401,7 @@ App.listen(port, () => {
 
 // Make the server ping itself every 5 minutes to prevent Dyno sleep
 setInterval(() => {
-	http.get("http://taiznet.herokuapp.com");
+	let currentTime = new Date();
+	if (currentTime.getHours() >= 6) http.get("http://taiznet.herokuapp.com"); // Allowing the app to sleep between 00:00 - 06:00
 }, 300000);
 
